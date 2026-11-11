@@ -1,0 +1,6 @@
+/* Bara de sus a demo-ului. Folosește culorile site-ului (variabilele din site.css). */
+.demo-strip { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 1rem; padding: 0.5rem var(--gap); background: var(--surface-2); border-bottom: 1px solid var(--line); color: var(--muted); font-size: 0.85rem; line-height: 1.4; }
+.demo-strip strong { color: var(--text); font-weight: 600; }
+.demo-strip button { background: none; border: 0; padding: 0.15rem 0; color: var(--text); font-size: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.demo-strip button:hover { color: var(--accent); }
+@media print { .demo-strip { display: none; } }

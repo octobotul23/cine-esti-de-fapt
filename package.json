@@ -1,0 +1,14 @@
+{
+  "name": "cine-esti-de-fapt",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Teste de autocunoaștere și de cuplu: site, panou de administrare și server",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "start": "node server/server.js",
+    "create-admin": "node server/manage.js create-admin",
+    "test": "node tools/test-site.js && node tools/test-plati.js",
+    "plati-simulate": "node tools/plati-simulate.js",
+    "demo": "node tools/build-demo.js"
+  }
+}

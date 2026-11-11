@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Panou de administrare</title>
+  <meta name="theme-color" content="#0A0612">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap">
+  <link rel="stylesheet" href="/css/site.css">
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body data-world="eu" class="adm">
+  <header class="top adm-top">
+    <a class="brand" href="/" aria-label="Înapoi la site">
+      <svg class="mark" viewBox="0 0 40 24" aria-hidden="true"><circle class="mark-eu" cx="13" cy="12" r="10"/><circle class="mark-noi" cx="27" cy="12" r="10"/></svg>
+      <span>Panou de administrare</span>
+    </a>
+    <span class="adm-who" id="who" hidden>
+      <span id="who-mail" class="muted small"></span>
+      <button class="link" type="button" id="logout">Ieșiți din cont</button>
+    </span>
+  </header>
+
+  <div class="adm-shell">
+    <nav class="adm-nav" id="nav" aria-label="Secțiunile panoului" hidden></nav>
+    <main id="adm" class="adm-main" tabindex="-1"><p class="state">Se încarcă…</p></main>
+  </div>
+
+  <!-- Apare doar când există modificări nesalvate. -->
+  <div class="savebar" id="savebar" hidden>
+    <div id="save-msg" class="save-msg">Aveți modificări nesalvate. Ele ajung pe site abia după ce apăsați „Salvați”.</div>
+    <div class="actions">
+      <button class="btn btn-line" type="button" id="discard">Renunțați</button>
+      <button class="btn" type="button" id="save">Salvați</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="/js/content.js"></script>
+  <script src="/js/admin.js"></script>
+</body>
+</html>

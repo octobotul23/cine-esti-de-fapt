@@ -1,0 +1,9 @@
+# Date reale: conturi, sesiuni, conținut salvat, răspunsurile clienților. Se salvează separat, nu se pun în git.
+data/
+data-test/
+data-smoke*/
+# Demo-ul făcut cu `npm run demo`. Se reface oricând.
+dist/
+# Cheile procesatorilor de plăți. Nu se pun niciodată în git.
+.env
+.env.*

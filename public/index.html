@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ro">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Cine ești, de fapt? Teste despre tine și despre voi doi</title>
+  <meta name="description" content="Șapte teste scurte despre personalitate, logică, emoții și relații, plus un test de cuplu. Începi gratis, fără cont.">
+  <meta name="theme-color" content="#0A0612">
+  <link rel="manifest" href="/site.webmanifest">
+  <link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/assets/icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:ital,wght@0,400;0,500;0,600;0,700;0,800;1,800;1,900&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap">
+  <link rel="stylesheet" href="/css/site.css">
+</head>
+<body data-world="eu">
+  <a class="skip" href="#app">Sari la conținut</a>
+
+  <!-- Desenele refolosite în pagină: degradeurile, cele două profiluri și iconițele.
+       Sunt desenate aici, în cod, ca să nu depindă de imagini din afară. -->
+  <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <linearGradient id="g-neon" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#9D6BFF"/><stop offset="0.55" stop-color="#E24BD0"/><stop offset="1" stop-color="#FF4F9A"/>
+      </linearGradient>
+      <linearGradient id="g-face-v" x1="1" y1="0.3" x2="0" y2="0.6">
+        <stop offset="0" stop-color="#C9A8FF" stop-opacity="0.95"/><stop offset="0.4" stop-color="#7B3FF2" stop-opacity="0.45"/><stop offset="1" stop-color="#7B3FF2" stop-opacity="0.04"/>
+      </linearGradient>
+      <linearGradient id="g-face-p" x1="1" y1="0.3" x2="0" y2="0.6">
+        <stop offset="0" stop-color="#FFA3D7" stop-opacity="0.95"/><stop offset="0.4" stop-color="#DB2777" stop-opacity="0.45"/><stop offset="1" stop-color="#DB2777" stop-opacity="0.04"/>
+      </linearGradient>
+      <linearGradient id="g-edge-v" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0" stop-color="#E4D2FF"/><stop offset="1" stop-color="#7B3FF2" stop-opacity="0.25"/>
+      </linearGradient>
+      <linearGradient id="g-edge-p" x1="1" y1="0" x2="0" y2="0">
+        <stop offset="0" stop-color="#FFD0EA"/><stop offset="1" stop-color="#DB2777" stop-opacity="0.25"/>
+      </linearGradient>
+      <radialGradient id="g-halo">
+        <stop offset="0" stop-color="#E24BD0" stop-opacity="0.6"/><stop offset="0.55" stop-color="#7B3FF2" stop-opacity="0.2"/><stop offset="1" stop-color="#7B3FF2" stop-opacity="0"/>
+      </radialGradient>
+
+      <!-- Profil care privește spre dreapta (cel din dreapta paginii e întors în oglindă din CSS). -->
+      <g id="p-m">
+        <path d="M118 270C116 256 114 246 117 236C130 241 150 243 163 238C176 233 180 220 176 208C174 204 177 201 181 197C185 192 183 187 178 184C182 182 185 178 183 173C181 169 180 166 182 163C192 162 199 158 197 151C190 138 180 122 175 108C180 96 180 78 172 58C160 28 125 10 90 14C40 20 12 60 16 110C18 150 38 176 52 196C60 215 58 245 54 270Z"/>
+        <path d="M150 113q9 5 18 0" fill="none" stroke="#0A0612" stroke-width="3" stroke-linecap="round"/>
+      </g>
+      <g id="p-f">
+        <path d="M122 270C120 256 119 246 121 237C134 241 150 242 162 237C174 232 178 220 174 208C172 204 175 201 179 197C183 192 181 187 176 184C180 182 183 178 181 173C179 169 178 166 180 163C188 162 194 158 192 152C186 140 178 124 174 110C178 96 178 78 170 60C158 30 124 12 90 16C36 20 14 70 22 120C28 160 14 200 2 232C20 250 44 262 70 270Z"/>
+        <path d="M149 114q9 5 18 0" fill="none" stroke="#0A0612" stroke-width="3" stroke-linecap="round"/>
+      </g>
+
+      <symbol id="i-bigfive" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.6-3.8 3.4-6 7-6s6.4 2.2 7 6"/></symbol>
+      <symbol id="i-iq" viewBox="0 0 24 24"><path d="M9.5 17.5h5M10.5 21h3"/><path d="M12 3a6 6 0 0 0-3.6 10.8c.6.5.9 1 .9 1.7h5.4c0-.7.3-1.2.9-1.7A6 6 0 0 0 12 3z"/></symbol>
+      <symbol id="i-emotional" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7.6 4.2 4.2 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10z"/></symbol>
+      <symbol id="i-dark" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol>
+      <symbol id="i-leadership" viewBox="0 0 24 24"><path d="M5 19h14M4.5 15.5l-1-8.5 5 4L12 5l3.5 6 5-4-1 8.5z"/></symbol>
+      <symbol id="i-relations" viewBox="0 0 24 24"><circle cx="9" cy="8.5" r="3"/><path d="M3 19.5c.5-3.2 2.9-5 6-5s5.5 1.800 6 5"/><path d="M15.500 5.700a3 3 0 0 1 0 5.600M17.500 14.900c1.900.6 3.100 2.200 3.500 4.600"/></symbol>
+      <symbol id="i-tarot" viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/><path d="M12 8.200l1.100 2.500 2.700.3-2 1.800.6 2.700-2.400-1.400-2.400 1.400.6-2.700-2-1.800 2.700-.3z"/></symbol>
+      <symbol id="i-cuplu" viewBox="0 0 24 24"><circle cx="9" cy="12" r="5.5"/><circle cx="15" cy="12" r="5.5"/></symbol>
+      <symbol id="i-any" viewBox="0 0 24 24"><path d="M12 3l1.800 5.400L19 10l-5.200 1.600L12 17l-1.800-5.400L5 10l5.200-1.600z"/></symbol>
+      <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.500l4.500 4.500L19 7.500"/></symbol>
+    </defs>
+  </svg>
+
+  <header class="top" data-group="Meniu și subsol">
+    <a class="brand" href="#/" aria-label="Prima pagină">
+      <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+        <circle cx="20" cy="20" r="18.500" fill="#150D24" stroke="url(#g-neon)" stroke-width="1.500"/>
+        <use href="#p-m" transform="translate(8.500 6.500) scale(0.105)" fill="url(#g-neon)"/>
+        <text class="logo-q" x="18.500" y="23" text-anchor="middle">?</text>
+      </svg>
+      <span class="brand-name" data-text="settings.siteName">Cine ești, de fapt?</span>
+    </a>
+    <nav class="nav" aria-label="Meniu">
+      <a href="#/" data-edit="ui.navHome" data-label="Meniul de sus: linkul către prima pagină">Acasă</a>
+      <a href="#/eu" data-edit="ui.navTests" data-label="Meniul de sus: linkul către testele despre tine">Teste</a>
+      <a href="#/noi" data-edit="ui.navCouple" data-label="Meniul de sus: linkul către testul de cuplu">Cuplu</a>
+      <a href="#/tarot" id="nav-tarot" data-edit="ui.navTarot" data-label="Meniul de sus: linkul către tarot">Tarot</a>
+      <a href="#/preturi" data-edit="ui.navPrices" data-label="Meniul de sus: linkul către prețuri">Prețuri</a>
+    </nav>
+    <div class="top-actions">
+      <a class="pill" href="#/profil" data-edit="ui.myLink" data-label="Butonul de sus către pagina cu linkul privat">Linkul meu</a>
+      <a class="pill pill-fill" href="#/eu" data-edit="ui.topCta" data-label="Butonul colorat din colțul de sus (apare pe ecrane mari)">Începe gratuit</a>
+    </div>
+  </header>
+
+  <main id="app" tabindex="-1">
+    <!-- Prima pagină. Textele cu data-edit se schimbă din panou → Texte. -->
+    <div id="home" class="view home" data-group="Prima pagină">
+      <section class="hero">
+        <div class="hero-art" aria-hidden="true">
+          <svg class="face face-l" viewBox="0 0 210 270"><use href="#p-m" fill="url(#g-face-v)" stroke="url(#g-edge-v)" stroke-width="2"/></svg>
+          <svg class="mind" viewBox="0 0 200 200">
+            <circle class="mind-halo" cx="100" cy="100" r="98" fill="url(#g-halo)"/>
+            <circle cx="100" cy="100" r="76" fill="none" stroke="url(#g-neon)" stroke-width="1.500" opacity="0.7"/>
+            <path d="M78 142C58 144 44 130 50 114C36 106 36 84 52 78C50 60 68 48 84 56C92 42 116 42 122 56C138 48 156 60 152 78C168 86 166 110 150 116C154 132 138 144 122 138C114 150 88 152 78 142Z" fill="#7B3FF2" fill-opacity="0.25" stroke="url(#g-neon)" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M84 56C80 70 88 78 98 76M122 56C124 68 116 76 108 78M52 78C62 82 68 92 64 102M152 78C142 84 138 94 142 104M78 142C80 130 90 126 98 130M122 138C122 128 114 122 106 126" fill="none" stroke="url(#g-neon)" stroke-width="2" stroke-linecap="round" opacity="0.75"/>
+            <text class="mind-q" x="100" y="122" text-anchor="middle">?</text>
+          </svg>
+          <svg class="face face-r" viewBox="0 0 210 270"><use href="#p-f" fill="url(#g-face-p)" stroke="url(#g-edge-p)" stroke-width="2"/></svg>
+        </div>
+        <h1 class="hero-title" data-text="settings.siteName">Cine ești, de fapt?</h1>
+        <p class="hero-sub" data-edit="home.heroSub" data-label="Rândul de sub titlul mare">Crezi că te cunoști? Descoperă ce nu vezi la tine.</p>
+        <ul class="topics" id="home-topics"></ul>
+        <a class="btn btn-glow btn-hero" href="#/eu">
+          <span data-edit="home.heroCta" data-label="Butonul mare din partea de sus">Începe testul gratuit</span>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg>
+        </a>
+      </section>
+
+      <section class="trio" aria-label="Alege de unde începi">
+        <a class="way" href="#/eu">
+          <svg class="ico way-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bigfive"/></svg>
+          <h2 class="way-title" data-edit="home.euTitle" data-label="Primul card: titlul">Testează-te pe tine</h2>
+          <p data-edit="home.euLead" data-label="Primul card: textul">Șapte teste scurte despre cum gândești, ce simți și cum te porți cu ceilalți.</p>
+          <span class="way-cta"><span data-edit="home.euCta" data-label="Primul card: linkul către testele despre tine">Începe cu tine</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="way way-hot" href="#/noi">
+          <svg class="ico way-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-cuplu"/></svg>
+          <h2 class="way-title" data-edit="home.noiTitle" data-label="Cardul din mijloc: titlul">Testează-ți partenerul</h2>
+          <p data-edit="home.noiLead" data-label="Cardul din mijloc: textul">Răspundeți amândoi, fiecare de pe telefonul lui.</p>
+          <span class="way-cta"><span data-edit="home.noiCta" data-label="Cardul din mijloc: linkul către testul de cuplu">Începeți în doi</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+        <a class="way" href="#/tarot" id="way-tarot">
+          <svg class="ico way-ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-tarot"/></svg>
+          <h2 class="way-title" data-edit="home.tarotTitle" data-label="Al treilea card: titlul">Trage o carte de tarot</h2>
+          <p data-edit="home.tarotLead" data-label="Al treilea card: textul">Cartea zilei e gratuită.</p>
+          <span class="way-cta"><span data-edit="home.tarotCta" data-label="Al treilea card: linkul către tarot">Deschide tarotul</span><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><use href="#i-arrow"/></svg></span>
+        </a>
+      </section>
+
+      <!-- Prețuri. Numele, suma și descrierea fiecărui card vin din panou → Prețuri. -->
+      <section class="band band-wide" id="preturi">
+        <h2 data-edit="home.pretTitle" data-label="Titlul secțiunii de prețuri">Cât costă</h2>
+        <p class="lead" data-edit="home.pretLead" data-label="Textul de sub titlul prețurilor">Începutul e gratuit.</p>
+        <div class="plans">
+          <article class="plan" data-plan="modul">
+            <h3 class="plan-name"></h3>
+            <p class="plan-price"></p>
+            <p class="plan-desc"></p>
+            <ul class="ticks" data-edit-list="home.modulPuncte" data-fields="text:Rândul cu bifă" data-label="Cardul cu un singur test: rândurile cu bifă"></ul>
+            <a class="btn btn-line btn-wide" href="#/eu" data-edit="home.modulCta" data-label="Cardul cu un singur test: butonul">Alege un test</a>
+          </article>
+          <article class="plan plan-hot" data-plan="pachet">
+            <p class="plan-badge" data-edit="home.pachetBadge" data-label="Cardul cu tot pachetul: eticheta din colț">Cel mai bun preț</p>
+            <h3 class="plan-name"></h3>
+            <p class="plan-price"></p>
+            <p class="plan-desc"></p>
+            <p class="plan-intro" data-edit="home.pachetIntro" data-label="Cardul cu tot pachetul: rândul de deasupra listei de teste">Toate testele:</p>
+            <ul class="ticks" data-edit-list="home.pachetPuncte" data-fields="text:Rândul cu bifă" data-label="Cardul cu tot pachetul: rândurile cu bifă de după numele testelor"></ul>
+            <a class="btn btn-glow btn-wide" href="#/plata/pachet" data-edit="home.pachetCta" data-label="Cardul cu tot pachetul: butonul">Ia tot pachetul</a>
+          </article>
+          <article class="plan" data-plan="cuplu">
+            <h3 class="plan-name"></h3>
+            <p class="plan-price"></p>
+            <p class="plan-desc"></p>
+            <ul class="ticks" data-edit-list="home.cupluPuncte" data-fields="text:Rândul cu bifă" data-label="Cardul cu testul de cuplu: rândurile cu bifă"></ul>
+            <a class="btn btn-line btn-wide" href="#/noi" data-edit="home.cupluCta" data-label="Cardul cu testul de cuplu: butonul">Începeți în doi</a>
+          </article>
+        </div>
+        <p class="free-row">
+          <span class="tag tag-on" data-text="ui.free">Gratis</span>
+          <span><strong data-edit="home.pretGratisName" data-label="Rândul de sub prețuri: ce e gratuit">Varianta scurtă a fiecărui test</strong>
+            <span data-edit="home.pretGratisDesc" data-label="Rândul de sub prețuri: descrierea variantei gratuite">Primele întrebări și un rezultat parțial.</span></span>
+        </p>
+      </section>
+
+      <section class="band">
+        <h2 data-edit="home.pasiTitle" data-label="Titlul secțiunii cu pașii">Cum merge</h2>
+        <ol class="steps" id="home-steps" data-edit-list="home.pasi" data-fields="title:Titlul pasului|body:Textul pasului" data-label="Pașii din „Cum merge”"></ol>
+      </section>
+
+      <section class="band">
+        <h2 data-edit="home.moduleTitle" data-label="Titlul listei de teste">Ce afli despre tine</h2>
+        <ul class="rows" id="home-modules"></ul>
+      </section>
+
+      <section class="band">
+        <h2 data-edit="home.faqTitle" data-label="Titlul secțiunii de întrebări dese">Întrebări dese</h2>
+        <div class="faq" id="home-faq" data-edit-list="home.faq" data-fields="q:Întrebarea|a:Răspunsul" data-label="Întrebări dese"></div>
+      </section>
+
+      <section class="band note">
+        <h2 data-edit="home.notaTitle" data-label="Titlul notei de la finalul paginii">Ce nu este acest site</h2>
+        <p data-edit="home.nota" data-label="Nota despre ce nu este site-ul (diagnostic, IQ clinic, preziceri)">Testele sunt un instrument de autocunoaștere.</p>
+      </section>
+    </div>
+
+    <!-- Aici apar celelalte pagini: teste, rezultate, plată, tarot, cuplu. -->
+    <div id="view" class="view" hidden></div>
+  </main>
+
+  <footer class="foot" data-group="Meniu și subsol">
+    <p><span id="copy" class="copy">©</span> <span id="year"></span> <span data-text="settings.siteName">Cine ești, de fapt?</span></p>
+    <p class="foot-links">
+      <a href="#/confidentialitate" data-edit="ui.privacy" data-label="Linkul din subsol către pagina de confidențialitate">Confidențialitate</a>
+      <a href="#/termeni" data-edit="ui.terms" data-label="Linkul din subsol către termeni">Termeni</a>
+      <a id="foot-mail" hidden></a>
+    </p>
+    <p class="foot-note" data-edit="ui.footNote" data-label="Rândul mic din subsol">Instrument de autocunoaștere. Nu pune diagnostice.</p>
+  </footer>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+  <!-- Textele pe care le pune JavaScript-ul în pagini. Panoul ia singur toate textele
+       din secțiunea numită în data-edit-all (din content.js) și le arată sub titlul din data-group. -->
+  <div hidden>
+    <i data-edit="home.topicCuplu" data-label="Rândul de iconițe: numele de sub iconița testului de cuplu" data-group="Prima pagină"></i>
+    <i data-edit-all="home" data-group="Prima pagină"></i>
+    <i data-edit-all="eu" data-group="Pagina cu testele despre tine"></i>
+    <i data-edit-all="test" data-group="În timpul unui test"></i>
+    <i data-edit-all="rezultat" data-group="Rezultatul unui test"></i>
+    <i data-edit-all="raport" data-group="Raportul care leagă testele"></i>
+    <i data-edit-all="tarot" data-group="Pagina de tarot"></i>
+    <i data-edit-all="noi" data-group="Testul de cuplu"></i>
+    <i data-edit-all="plata" data-group="Pagina de plată"></i>
+    <i data-edit-all="profil" data-group="Pagina „Linkul meu”"></i>
+    <i data-edit-all="ui" data-group="Butoane și mesaje scurte"></i>
+    <i data-edit-all="legal" data-group="Confidențialitate și termeni"></i>
+  </div>
+
+  <script src="/js/content.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
