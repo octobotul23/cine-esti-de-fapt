@@ -8,7 +8,7 @@
   const BAR_TEXT = barMsg.textContent;
   const SECTIONS = [["texte", "Texte"], ["preturi", "Prețuri"], ["teste", "Teste"], ["cuplu", "Test de cuplu"], ["tarot", "Tarot"], ["raport", "Raport"], ["coduri", "Coduri promo"], ["setari", "Setări"]];
 
-  let csrf = "", rev = 0, doc = null, origJson = "", section = "texte", curMod = "", query = "", pageMap = null, uid = 0;
+  let csrf = "", rev = 0, doc = null, origJson = "", section = "texte", curMod = "", query = "", pageMap = null, uid = 0, version = null;
   const open = new Set(["g:Prima pagină"]);   // ce grupuri și rânduri sunt deschise
   const shapes = {};                          // forma unui rând nou, pentru fiecare listă
 
@@ -29,6 +29,7 @@
   const clone = (v) => JSON.parse(JSON.stringify(v));
   const short = (s, n) => { s = String(s == null ? "" : s).replace(/\s+/g, " ").trim(); return s.length > n ? s.slice(0, n - 1) + "…" : s; };
   const when = (iso) => (iso ? new Date(iso).toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" }) : "");
+  const day = (iso) => { const d = new Date(iso), two = (n) => String(n).padStart(2, "0"); return two(d.getDate()) + "." + two(d.getMonth() + 1) + "." + d.getFullYear(); };
   const money = (n) => Number(n).toFixed(2).replace(".", ",") + " " + doc.site.settings.currency;
   const many = (n, one, more) => (n === 1 ? "1 " + one : n + (n % 100 === 0 || n % 100 >= 20 ? " de " : " ") + more);
   const newId = (p) => p + "_" + Array.from(crypto.getRandomValues(new Uint8Array(4)), (b) => b.toString(16).padStart(2, "0")).join("");
@@ -241,7 +242,9 @@
   async function enter(email) {
     $("#who-mail").textContent = email;
     $("#who").hidden = false;
-    setDoc(await api("GET", "admin/doc"));
+    const d = await api("GET", "admin/doc");
+    version = d.version || null;
+    setDoc(d);
     nav.hidden = false;
     route();
   }
@@ -672,7 +675,9 @@
       } }, h("div", { class: "field" }, h("label", { for: "pw-cur" }, "Parola de acum"), cur), h("div", { class: "field" }, h("label", { for: "pw-new" }, "Parola nouă"), next, h("p", { class: "hint" }, "Cel puțin 12 caractere.")),
         h("div", { class: "field" }, h("label", { for: "pw-again" }, "Parola nouă, încă o dată"), again), pwMsg, h("div", { class: "actions" }, h("button", { class: "btn btn-line", type: "submit" }, "Schimbați parola")))),
       group("s:log", "Jurnal", "Ultimele intrări în cont, salvări și restaurări.", () => lazy(() => api("GET", "admin/audit"), (d) =>
-        d.lines.length ? d.lines.map((l) => h("div", { class: "trow" }, h("b", null, EVENTS[l.event] || l.event), h("span", { class: "muted" }, [when(l.at), l.email, l.cod ? "cod " + l.cod : "", l.din ? "s-a revenit la " + l.din : "", l.rev ? (l.din ? "a rezultat versiunea " : "versiunea ") + l.rev : "", "IP " + l.ip].filter(Boolean).join(", ")))) : h("p", { class: "muted" }, "Jurnalul este gol.")))];
+        d.lines.length ? d.lines.map((l) => h("div", { class: "trow" }, h("b", null, EVENTS[l.event] || l.event), h("span", { class: "muted" }, [when(l.at), l.email, l.cod ? "cod " + l.cod : "", l.din ? "s-a revenit la " + l.din : "", l.rev ? (l.din ? "a rezultat versiunea " : "versiunea ") + l.rev : "", "IP " + l.ip].filter(Boolean).join(", ")))) : h("p", { class: "muted" }, "Jurnalul este gol."))),
+      // Versiunea care rulează pe server, din package.json. Apare doar aici, niciodată pe site.
+      version && version.number ? h("p", { class: "adm-version" }, "v" + version.number + (version.date ? " · urcată pe " + day(version.date) : "")) : null];
   }
 
   const VIEWS = { texte: viewTexte, preturi: viewPreturi, teste: viewTeste, cuplu: viewCuplu, tarot: viewTarot, raport: viewRaport, coduri: viewCoduri, setari: viewSetari };

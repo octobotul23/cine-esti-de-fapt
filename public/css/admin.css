@@ -25,6 +25,8 @@
 .adm .input[aria-invalid="true"] { border-color: #FF8FA3; }
 .adm .field label { color: var(--text); font-weight: 600; }
 .hint { color: var(--muted); font-size: 0.88rem; }
+/* Versiunea care rulează: mic, în colțul de jos al Setărilor. */
+.adm-version { margin: 1.5rem 0 0; text-align: right; color: var(--muted); font-size: 0.78rem; font-variant-numeric: tabular-nums; }
 .cols { display: grid; gap: 0.9rem; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); align-items: start; }
 .adm .check { color: var(--text); align-items: center; }
 .adm .check small { display: block; color: var(--muted); }

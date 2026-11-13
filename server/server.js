@@ -492,7 +492,7 @@ async function adminApi(req, res, parts) {
   if (route === "GET admin/doc") {
     adminSession(req);
     const d = getDoc();
-    return sendJson(res, 200, { rev: d.rev, updated: d.updated, by: d.by, doc: { site: d.site, tests: d.tests } });
+    return sendJson(res, 200, { rev: d.rev, updated: d.updated, by: d.by, version: cfg.VERSION, doc: { site: d.site, tests: d.tests } });
   }
   if (route === "PUT site") {
     const s = guard(req);

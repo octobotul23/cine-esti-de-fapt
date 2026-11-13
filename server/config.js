@@ -1,15 +1,26 @@
 // Setările serverului. Se pot schimba prin variabile de mediu sau, pentru port și folderul de date,
 // prin argumente: node server/server.js --port=8080 --data=/var/lib/cupidon  (vezi README).
 
+const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = path.resolve(__dirname, "..");
+// Versiunea care rulează. Vine dintr-un singur loc, package.json; data este cea la care fișierul a ajuns pe server.
+// O vede doar cine a intrat în panou (Setări).
+function readVersion() {
+  try {
+    const file = path.join(ROOT, "package.json");
+    const at = fs.statSync(file).mtime;
+    return { number: String(JSON.parse(fs.readFileSync(file, "utf8")).version || ""), date: at ? new Date(at).toISOString() : "" };
+  } catch (e) { return { number: "", date: "" }; }
+}
 const env = process.env;
 const arg = (name) => { const a = process.argv.find((x) => x.startsWith("--" + name + "=")); return a ? a.slice(name.length + 3) : ""; };
 const bool = (v, d) => (v == null || v === "" ? d : /^(1|true|yes|da)$/i.test(v));
 
 module.exports = {
   ROOT,
+  VERSION: readVersion(),
   PUBLIC_DIR: path.join(ROOT, "public"),
   PORT: Number(arg("port") || env.PORT) || 5180,
   HOST: arg("host") || env.HOST || "0.0.0.0",

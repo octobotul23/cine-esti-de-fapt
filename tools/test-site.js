@@ -23,7 +23,7 @@ async function call(method, url, body, headers = {}) {
   r = await call("GET", "/../server/tests.js"); ok(r.status === 404, "nu servește server/");
   r = await call("GET", "/%2e%2e/server/tests.js"); ok(r.status === 404, "nu servește server/ (codat)");
   r = await call("GET", "/js/content.js"); ok(r.status === 200 && r.headers.get("content-security-policy").includes("script-src 'self'"), "content.js + CSP");
-  r = await call("GET", "/api/site"); ok(r.j.meta.modules.bigfive.total === 50 && !r.t.includes("Sunt sufletul"), "site fără întrebări");
+  r = await call("GET", "/api/site"); ok(r.j.meta.modules.bigfive.total === 50 && !r.t.includes("Îmi place să încerc activități"), "site fără întrebări");
 
   console.log("profil + test");
   r = await call("POST", "/api/profile", {}); const P = { "X-Profile": r.j.token }; ok(r.j.token.length === 32, "token");
@@ -33,7 +33,7 @@ async function call(method, url, body, headers = {}) {
   r = await call("POST", "/api/test/bigfive", { answers: ans }, P); ok(r.j.status === "partial", "status partial");
   r = await call("POST", "/api/test/bigfive", { answers: { bf11: 3 } }, P); r = await call("GET", "/api/test/bigfive", undefined, P); ok(!r.j.answers.bf11, "răspuns la întrebare plătită ignorat");
   r = await call("GET", "/api/result/bigfive", undefined, P); ok(r.j.dims.filter((d) => !d.locked).length === 1 && r.j.complete, "o singură trăsătură vizibilă");
-  r = await call("GET", "/api/test/iq", undefined, P); ok(r.j.questions.length === 8 && !("correct" in r.j.questions[0]), "iq 8 fără răspuns corect");
+  r = await call("GET", "/api/test/iq", undefined, P); ok(r.j.questions.length === 10 && !("correct" in r.j.questions[0]), "iq 10 fără răspuns corect");
   r = await call("GET", "/api/report", undefined, P); ok(r.status === 402, "raport blocat");
   r = await call("GET", "/api/tarot", undefined, P); ok(r.j.day.card.name && !r.j.day.card.sens && !r.j.unlocked, "cartea zilei, fără sens");
   r = await call("POST", "/api/tarot/personal", { name: "Ana", day: 15, month: 8, year: 1990 }, P); ok(r.status === 402, "carte personală blocată");
@@ -78,7 +78,7 @@ async function call(method, url, body, headers = {}) {
   r = await call("POST", "/api/test/bigfive", { answers: all }, P); ok(r.j.status === "done", "bigfive done");
   r = await call("GET", "/api/result/bigfive", undefined, P); ok(r.j.dims.every((d) => !d.locked && d.tip), "toate trăsăturile " + r.j.dims.map((d) => d.score).join(","));
   r = await call("GET", "/api/test/iq", undefined, P); const iq = {}; r.j.questions.forEach((q) => iq[q.id] = TESTS.modules.iq.questions.find((x) => x.id === q.id).correct);
-  r = await call("POST", "/api/test/iq", { answers: iq }, P); r = await call("GET", "/api/result/iq", undefined, P); ok(r.j.correct === 30 && r.j.interval.hi === 135 && r.j.review.length === 30, "iq 30/30 → " + JSON.stringify(r.j.interval));
+  r = await call("POST", "/api/test/iq", { answers: iq }, P); r = await call("GET", "/api/result/iq", undefined, P); ok(r.j.correct === 60 && r.j.interval.hi === 135 && r.j.review.length === 60, "iq 60/60 → " + JSON.stringify(r.j.interval));
   r = await call("POST", "/api/tarot/personal", { name: "Ana", day: 15, month: 8, year: 1990 }, P); ok(r.j.personal.card.n === 6 && r.j.personal.card.personal, "carte personală: " + r.j.personal.card.name);
   r = await call("POST", "/api/tarot/personal", { name: "Ana", day: 31, month: 2, year: 1990 }, P); ok(r.status === 400, "31 februarie refuzat");
   r = await call("POST", "/api/tarot/spread", {}, P); const s1 = r.j.spread.cards.map((c) => c.card.n).join(); ok(r.j.spread.cards.length === 3 && new Set(s1.split(",")).size === 3, "etalare " + s1);

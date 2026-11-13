@@ -121,8 +121,11 @@
     }
   };
   const missing = (file) => { const e = new Error("ENOENT: " + file); e.code = "ENOENT"; return e; };
+  // Singurul fișier „de pe server” care există în demo: package.json, cu versiunea pusă de tools/build-demo.js.
+  const PKG = window.CUPIDON_DEMO_PACKAGE || null;
+  const isPkg = (file) => !!PKG && file === "/package.json";
   const fsShim = {
-    readFileSync(file) { const v = disk.get(file); if (v == null) throw missing(file); return v; },
+    readFileSync(file) { if (isPkg(file)) return JSON.stringify({ version: PKG.version }); const v = disk.get(file); if (v == null) throw missing(file); return v; },
     writeFileSync(file, data) { disk.set(file, String(data)); },
     // Jurnalul: păstrăm doar ultimele 200 de rânduri, fiindcă locul din browser e mic.
     appendFileSync(file, data) { disk.set(file, ((disk.get(file) || "") + data).split("\n").slice(-201).join("\n")); },
@@ -135,7 +138,7 @@
       for (const k of disk.keys()) if (k.startsWith(pre)) names.add(k.slice(pre.length).split("/")[0]);
       return [...names];
     },
-    statSync(file) { const v = disk.get(file); if (v == null) throw missing(file); return { size: v.length, isFile: () => true }; }
+    statSync(file) { if (isPkg(file)) return { size: 0, mtime: new Date(PKG.date), isFile: () => true }; const v = disk.get(file); if (v == null) throw missing(file); return { size: v.length, isFile: () => true }; }
   };
 
   // ---- Căi de fișiere, în stil „/a/b”

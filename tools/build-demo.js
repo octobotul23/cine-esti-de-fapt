@@ -59,6 +59,8 @@ patchPage("admin.html");
 
 // ---- 3. Serverul, împachetat pentru browser
 let bundle = "// Fișier generat de tools/build-demo.js. Nu se modifică de mână.\nwindow.CUPIDON_DEMO_MODULES = {};\n";
+// Versiunea din package.json și data la care a fost făcut demo-ul: apar în panou, la Setări.
+bundle += "window.CUPIDON_DEMO_PACKAGE = " + JSON.stringify({ version: require(path.join(ROOT, "package.json")).version, date: new Date().toISOString() }) + ";\n";
 for (const name of SERVER_MODULES) {
   const src = fs.readFileSync(path.join(ROOT, "server", name + ".js"), "utf8");
   for (const m of src.matchAll(/require\(\s*["']([^"']+)["']\s*\)/g)) {

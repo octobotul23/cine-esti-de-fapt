@@ -50,11 +50,11 @@
     // Testele din pagina „Cine ești, de fapt?”. Ordinea de aici e ordinea de pe site.
     modules: [
       { id: "bigfive", name: "Personalitate", tagline: "Cele cinci trăsături care te descriu cel mai bine.", on: true },
-      { id: "iq", name: "IQ orientativ", tagline: "Logică, numere, tipare și cuvinte.", on: true },
-      { id: "emotional", name: "Profil emoțional", tagline: "Cum reacționezi la stres și ce faci cu emoțiile tale.", on: true },
-      { id: "dark", name: "Latura ta ascunsă", tagline: "Ambiție, strategie și sânge rece, fără etichete.", on: true },
-      { id: "leadership", name: "Leadership", tagline: "Cum iei decizii și cum îi tragi pe ceilalți după tine.", on: true },
-      { id: "relations", name: "Relații", tagline: "Cum comunici, cum te cerți și de câtă apropiere ai nevoie.", on: true },
+      { id: "iq", name: "IQ orientativ", tagline: "Logică, calcul, tipare și cuvinte, de la ușor la greu.", on: true },
+      { id: "emotional", name: "Profil emoțional", tagline: "Cum îți recunoști emoțiile, ce faci cu ele și cum le spui.", on: true },
+      { id: "dark", name: "Latura ta ascunsă", tagline: "Apreciere, strategie și impuls, fără etichete.", on: true },
+      { id: "leadership", name: "Leadership", tagline: "Cum iei decizii, cum lucrezi cu ceilalți și cum te adaptezi.", on: true },
+      { id: "relations", name: "Relații", tagline: "Cum comunici, cum te cerți și ce vă doriți împreună.", on: true },
       { id: "tarot", name: "Tarot", tagline: "Cartea zilei, cartea ta personală și o etalare de trei cărți.", on: true }
     ],
 
@@ -109,10 +109,10 @@
       faq: [
         { q: "Chiar e gratis la început?", a: "Da. Varianta scurtă a fiecărui test și rezultatul ei parțial sunt gratuite. Prețul raportului complet îl vezi înainte să începi." },
         { q: "Trebuie să îmi fac cont?", a: "Nu. Primești un link privat cu care te întorci oricând la rezultatele tale. Nu îți cerem nume sau parolă." },
-        { q: "Cât durează?", a: "Varianta scurtă a unui test durează două-trei minute. Cea completă, între cinci și zece minute. Poți face testele pe rând, în zile diferite." },
+        { q: "Cât durează?", a: "Varianta scurtă a unui test durează două-trei minute. Cea completă, între cinci și zece minute, iar la IQ orientativ în jur de douăzeci. Poți face testele pe rând, în zile diferite." },
         { q: "Cum merge testul de cuplu?", a: "Tu răspunzi primul, apoi îi trimiți partenerului un link pe WhatsApp. El răspunde separat, de pe telefonul lui. Rezultatul apare doar după ce ați răspuns amândoi." },
         { q: "Partenerul îmi vede răspunsurile?", a: "Da, în raportul comun, după ce a răspuns și el. Înainte de asta, niciunul nu vede ce a ales celălalt." },
-        { q: "Cât de exact este IQ-ul orientativ?", a: "Este o estimare făcută din 30 de întrebări, afișată ca interval. Un IQ real se măsoară doar de un psiholog, cu un test standardizat." },
+        { q: "Cât de exact este IQ-ul orientativ?", a: "Este o estimare făcută din 60 de întrebări, de la ușoare la grele, afișată ca interval. Un IQ real se măsoară doar de un psiholog, cu un test standardizat." },
         { q: "Tarotul îmi spune viitorul?", a: "Nu. Cărțile sunt un joc de reflecție: îți dau o temă la care să te gândești, nu o prezicere." },
         { q: "Am un cod promoțional. Unde îl pun?", a: "În pagina de plată, în câmpul „Cod promoțional”. Reducerea apare înainte să plătești." },
         { q: "Ce se întâmplă cu răspunsurile mele?", a: "Le păstrăm sub un cod, fără numele tău, ca să îți putem arăta raportul. Le poți șterge oricând din pagina „Linkul meu”." }

@@ -60,7 +60,7 @@ Codurile promo fac excepție: ele se salvează pe loc.
 | **Tarot** | Textele celor 22 de cărți și pozițiile etalării (între 1 și 5 cărți). |
 | **Raport** | Titlurile de profil, introducerile capitolelor, rândul despre IQ și provocarea de 7 zile. |
 | **Coduri promo** | Creați coduri de reducere: procent (0–100%) sau „2 + 1 gratis”. Puteți scrie codul sau îl lăsați generat. Opțional: număr maxim de folosiri, dată de expirare, notă. Un cod poate fi oprit, repornit sau șters. |
-| **Setări** | Numele site-ului și al testului de cuplu, adresa de contact, titlul și descrierea din Google, dacă oamenii își pot lăsa e-mailul; plățile (starea lor, metodele și ordinea lor, moneda, cursul euro, tarifele de SMS; vedeți „Plăți” mai jos); versiunile salvate (ultimele 30, oricare se poate readuce) și revenirea la valorile implicite; cifre, comenzi și lista de adrese de e-mail (CSV); schimbarea parolei; jurnalul. |
+| **Setări** | Numele site-ului și al testului de cuplu, adresa de contact, titlul și descrierea din Google, dacă oamenii își pot lăsa e-mailul; plățile (starea lor, metodele și ordinea lor, moneda, cursul euro, tarifele de SMS; vedeți „Plăți” mai jos); versiunile salvate (ultimele 30, oricare se poate readuce) și revenirea la valorile implicite; cifre, comenzi și lista de adrese de e-mail (CSV); schimbarea parolei; jurnalul. Jos, în colț, scrie mic versiunea care rulează (de ex. „v0.3.0 · urcată pe 13.11.2026”); numărul vine din `package.json` și se vede doar în panou. |
 
 ### Două reguli pentru texte
 
@@ -205,6 +205,7 @@ server/
   pay.js           plățile: Stripe, PayPal, SMS
   manage.js        comenzile pentru cont
 tools/             probe automate, site-ul cu plăți simulate și varianta de demo (nu se servesc)
+docs/              biblioteca de întrebări, așa cum a fost primită (nu se servește)
 dist/              demo-ul făcut cu `npm run demo` (se reface oricând; nu se pune în git)
 data/              datele salvate (apare la prima pornire; nu se pune în git)
 ```
@@ -268,6 +269,8 @@ Ca să îl vedeți pe calculator înainte de încărcare: `node tools/build-demo
 ## De știut înainte de lansare
 
 - Textele din „Confidențialitate” și „Termeni” sunt ciorne. Trebuie citite de cineva care se pricepe.
-- Întrebările de personalitate sunt o traducere proprie a setului public IPIP, nevalidată pe populația din România.
+- Întrebările vin din biblioteca de întrebări a site-ului (`docs/biblioteca-intrebari.csv`, modulele M1–M6). Sunt scrise pentru acest site și nu sunt validate ca instrument psihologic. Rândurile FREE, COUPLE și FRIEND din bibliotecă nu sunt încă folosite pe site.
+- La „IQ orientativ”, după cele 30 de întrebări ușoare din bibliotecă urmează 30 mai grele. Fără ele, aproape oricine ar primi intervalul cel mai mare. Se pot scoate din panou, la Teste.
+- La „Latura ta ascunsă”, un scor mare înseamnă „mai mult din trăsătură”. Bifa „Afirmație inversă” de la fiecare întrebare (panou, Teste) spune în ce direcție trage întrebarea.
 - „IQ orientativ” dă un interval estimativ, nu un IQ măsurat clinic.
 - Fonturile se încarcă de la Google Fonts.
