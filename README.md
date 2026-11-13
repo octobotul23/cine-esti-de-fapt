@@ -61,7 +61,7 @@ Codurile promo fac excepție: ele se salvează pe loc.
 | **Tarot** | Textele celor 22 de cărți și pozițiile etalării (între 1 și 5 cărți). |
 | **Raport** | Titlurile de profil, introducerile capitolelor, rândul despre IQ și provocarea de 7 zile. |
 | **Coduri promo** | Creați coduri de reducere: procent (0–100%) sau „2 + 1 gratis”. Puteți scrie codul sau îl lăsați generat. Opțional: număr maxim de folosiri, dată de expirare, notă. Un cod poate fi oprit, repornit sau șters. |
-| **Setări** | Numele site-ului și al testului de cuplu, adresa de contact, titlul și descrierea din Google, dacă oamenii își pot lăsa e-mailul; plățile (starea lor, metodele și ordinea lor, moneda, cursul euro, tarifele de SMS; vedeți „Plăți” mai jos); versiunile salvate (ultimele 30, oricare se poate readuce) și revenirea la valorile implicite; cifre, comenzi și lista de adrese de e-mail (CSV); schimbarea parolei; jurnalul. Jos, în colț, scrie mic versiunea care rulează (de ex. „v0.4.0 · urcată pe 13.11.2026”); numărul vine din `package.json` și se vede doar în panou. |
+| **Setări** | Numele site-ului și al testului de cuplu, adresa de contact, titlul și descrierea din Google, dacă oamenii își pot lăsa e-mailul; plățile (starea lor, metodele și ordinea lor, moneda, cursul euro, tarifele de SMS; vedeți „Plăți” mai jos); versiunile salvate (ultimele 30, oricare se poate readuce) și revenirea la valorile implicite; cifre, comenzi și lista de adrese de e-mail (CSV); schimbarea parolei; jurnalul. Jos, în colț, scrie mic versiunea care rulează (de ex. „v0.5.0 · urcată pe 13.11.2026”); numărul vine din `package.json` și se vede doar în panou. |
 
 ### Două reguli pentru texte
 
@@ -198,6 +198,8 @@ public/            tot ce vede browserul (doar acest folder se servește)
   js/app.js        site-ul
   js/admin.js      panoul
   css/             culori, fonturi, așezare
+  assets/          imaginile site-ului: cele două fețe și creierul din prima pagină (hero-*.webp), sigla (logo.webp),
+                   spatele cărților de tarot (tarot-spate.webp) și iconițele (icon-*.png)
 server/
   server.js        serverul
   tests.js         valorile implicite private: întrebări, răspunsuri corecte, texte de rezultat
@@ -270,6 +272,7 @@ Ca să îl vedeți pe calculator înainte de încărcare: `node tools/build-demo
 ## De știut înainte de lansare
 
 - Textele din „Confidențialitate” și „Termeni” sunt ciorne. Trebuie citite de cineva care se pricepe.
+- Imaginile din `public/assets/` se schimbă deocamdată doar înlocuind fișierele (același nume, aceeași formă), nu din panou. Fețele și creierul au fundal negru: pagina le topește în fundal, deci o imagine nouă trebuie să aibă tot fundal negru.
 - Întrebările vin din biblioteca de întrebări a site-ului (`docs/biblioteca-intrebari.csv`, modulele M1–M6). Sunt scrise pentru acest site și nu sunt validate ca instrument psihologic. Rândurile FREE sunt testul rapid gratuit (`#/rapid`): zece întrebări, rezultat pe loc, iar răspunsurile nu se păstrează pe server. Rândurile COUPLE și FRIEND din bibliotecă nu sunt încă folosite pe site.
 - La „IQ orientativ”, după cele 30 de întrebări ușoare din bibliotecă urmează 30 mai grele. Fără ele, aproape oricine ar primi intervalul cel mai mare. Se pot scoate din panou, la Teste.
 - La „Latura ta ascunsă”, un scor mare înseamnă „mai mult din trăsătură”. Bifa „Afirmație inversă” de la fiecare întrebare (panou, Teste) spune în ce direcție trage întrebarea.

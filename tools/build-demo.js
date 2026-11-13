@@ -150,7 +150,7 @@ function writeZip(files) {
 // ---- Imitația găzduirii de demo: un subfolder cu nume secret, doar citire, fără niciun /api
 function serve(port) {
   const PREFIX = "/demo-local-0123456789ab/";
-  const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png" };
+  const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript; charset=utf-8", ".css": "text/css; charset=utf-8", ".svg": "image/svg+xml", ".png": "image/png", ".webp": "image/webp" };
   http.createServer((req, res) => {
     const pathname = decodeURIComponent(new URL(req.url, "http://x").pathname);
     if (req.method !== "GET" && req.method !== "HEAD") { res.writeHead(405); return res.end(); }

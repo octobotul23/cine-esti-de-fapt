@@ -1,6 +1,6 @@
 {
   "name": "cine-esti-de-fapt",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "private": true,
   "description": "Teste de autocunoaștere și de cuplu: site, panou de administrare și server",
   "engines": { "node": ">=20" },
