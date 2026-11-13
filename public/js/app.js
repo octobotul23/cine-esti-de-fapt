@@ -160,6 +160,25 @@
     const d = $('meta[name="description"]');
     if (d) d.setAttribute("content", S.settings.seoDescription);
   }
+  // Imaginile schimbate din panou (secțiunea Imagini). Cele neschimbate rămân cum sunt în pagină.
+  // Dacă o imagine nouă nu se încarcă, rămâne cea de la început.
+  const media = (u) => (window.CUPIDON_DEMO && window.CUPIDON_DEMO.media ? window.CUPIDON_DEMO.media(u) : u);
+  function fillImages() {
+    const first = C.SITE.images, now = S.images || {};
+    const changed = (k) => typeof now[k] === "string" && now[k] && now[k] !== first[k];
+    for (const el of document.querySelectorAll("img[data-img]")) {
+      const k = el.dataset.img;
+      if (!changed(k)) continue;
+      const old = el.getAttribute("src");
+      el.addEventListener("error", () => { el.src = old; }, { once: true });
+      el.src = media(now[k]);
+    }
+    if (changed("tarotBack")) {
+      const url = media(now.tarotBack), probe = new Image();
+      probe.onload = () => document.documentElement.style.setProperty("--tarot-back", 'url("' + url + '")');
+      probe.src = url;
+    }
+  }
   const counts = (id) => {
     const m = META && META.modules[id];
     if (!m) return "";
@@ -871,6 +890,7 @@
     const back = new URLSearchParams(location.search);
     if (/^[\w-]{16}$/.test(back.get("plata") || "")) history.replaceState(null, "", location.pathname + "#/plata/gata/" + back.get("plata"));
     else if (back.has("plata_anulata") || back.has("plata")) history.replaceState(null, "", location.pathname + "#/plata");
+    fillImages();
     renderHome();
     window.addEventListener("hashchange", route);
     route();

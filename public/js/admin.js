@@ -6,7 +6,7 @@
   const $ = (sel, root) => (root || document).querySelector(sel);
   const main = $("#adm"), nav = $("#nav"), bar = $("#savebar"), barMsg = $("#save-msg"), saveBtn = $("#save");
   const BAR_TEXT = barMsg.textContent;
-  const SECTIONS = [["texte", "Texte"], ["preturi", "Prețuri"], ["teste", "Teste"], ["rapid", "Test rapid"], ["cuplu", "Test de cuplu"], ["tarot", "Tarot"], ["raport", "Raport"], ["coduri", "Coduri promo"], ["setari", "Setări"]];
+  const SECTIONS = [["texte", "Texte"], ["imagini", "Imagini"], ["preturi", "Prețuri"], ["teste", "Teste"], ["rapid", "Test rapid"], ["cuplu", "Test de cuplu"], ["tarot", "Tarot"], ["raport", "Raport"], ["coduri", "Coduri promo"], ["setari", "Setări"]];
 
   let csrf = "", rev = 0, doc = null, origJson = "", section = "texte", curMod = "", query = "", pageMap = null, uid = 0, version = null;
   const open = new Set(["g:Prima pagină"]);   // ce grupuri și rânduri sunt deschise
@@ -369,8 +369,120 @@
     return [head, search, none, groups];
   }
 
+  // ---- Imagini: fiecare loc de pe site care arată o imagine. Imaginea aleasă se micșorează aici, în browser,
+  // la mărimea de care are nevoie site-ul, apoi se trimite la server. Pe site ajunge abia la „Salvați”.
+  // fit: "black" = întreagă, pe fundal negru (pe site negrul nu se vede); "cover" = umple tot locul; "clear" = întreagă, cu fundal transparent.
+  // fade: cât din fiecare margine se stinge spre negru, ca imaginea să se topească în pagină.
+  const IMAGES = [
+    { id: "heroMan", name: "Prima pagină: fața din stânga", w: 602, h: 1000, fit: "black", fade: { top: 0.04, bottom: 0.16, left: 0.08 },
+      hint: "Un portret pe fundal negru, mai înalt decât lat (cam 3 pe 5), cu fața spre dreapta. Negrul nu se vede pe site: rămâne doar fața luminată." },
+    { id: "heroWoman", name: "Prima pagină: fața din dreapta", w: 602, h: 1000, fit: "black", fade: { top: 0.04, bottom: 0.16, right: 0.16 },
+      hint: "Un portret pe fundal negru, mai înalt decât lat (cam 3 pe 5), cu fața spre stânga. Negrul nu se vede pe site: rămâne doar fața luminată." },
+    { id: "heroMind", name: "Prima pagină: desenul dintre fețe", w: 640, h: 640, fit: "black",
+      hint: "O imagine pătrată, pe fundal negru. Negrul nu se vede pe site." },
+    { id: "logo", name: "Sigla din meniu", w: 192, h: 192, fit: "clear",
+      hint: "O imagine pătrată. Cel mai bine arată un PNG cu fundal transparent. Apare mică, în stânga sus, pe fiecare pagină." },
+    { id: "tarotBack", name: "Spatele cărților de tarot", w: 512, h: 768, fit: "cover",
+      hint: "O imagine în picioare, cam 2 pe 3. Dacă are altă formă, marginile se taie ca să umple cartea." }
+  ];
+  const MAX_UPLOAD = 1024 * 1024;
+  // În demo (fără server), imaginile stau în browser și adresa lor o dă demo-ul.
+  const media = (u) => (window.CUPIDON_DEMO && window.CUPIDON_DEMO.media ? window.CUPIDON_DEMO.media(u) : u);
+  const imgBusy = new Set(), imgErr = {};
+
+  function readImage(file) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file), img = new Image();
+      img.onload = () => { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("Fișierul ales nu a putut fi citit ca imagine. Alegeți un fișier PNG, JPG sau WebP.")); };
+      img.src = url;
+    });
+  }
+  // Aduce imaginea la mărimea locului ei și o face un fișier mic. Întoarce fișierul gata de trimis.
+  async function shrink(file, spec) {
+    if (!/^image\//.test(file.type)) throw new Error("Fișierul ales nu este o imagine. Alegeți un fișier PNG, JPG sau WebP.");
+    if (file.size > 30 * 1024 * 1024) throw new Error("Fișierul are peste 30 MB. Alegeți o imagine mai mică.");
+    const img = await readImage(file);
+    const iw = img.naturalWidth, ih = img.naturalHeight, W = spec.w, H = spec.h;
+    if (iw < W / 3 || ih < H / 3) throw new Error("Imaginea este prea mică (" + iw + " × " + ih + " puncte) și ar apărea neclară. Alegeți una de cel puțin " + W + " × " + H + " puncte.");
+    const c = h("canvas", { width: W, height: H }), g = c.getContext("2d");
+    const scale = spec.fit === "cover" ? Math.max(W / iw, H / ih) : Math.min(W / iw, H / ih);
+    const dw = iw * scale, dh = ih * scale, dx = (W - dw) / 2, dy = spec.fit === "black" ? 0 : (H - dh) / 2;
+    if (spec.fit !== "clear") { g.fillStyle = "#000"; g.fillRect(0, 0, W, H); }
+    g.imageSmoothingQuality = "high";
+    g.drawImage(img, dx, dy, dw, dh);
+    if (spec.fit === "black") {
+      // Negrul aproape-negru devine negru curat, altfel pe site s-ar vedea un dreptunghi palid în jurul imaginii.
+      const px = g.getImageData(0, 0, W, H), d = px.data;
+      for (let i = 0; i < d.length; i += 4) for (let j = i; j < i + 3; j++) d[j] = d[j] <= 6 ? 0 : Math.round((d[j] - 6) * 255 / 249);
+      g.putImageData(px, 0, 0);
+      const f = spec.fade || {};
+      const shade = (x0, y0, x1, y1) => {
+        const gr = g.createLinearGradient(x0, y0, x1, y1);
+        gr.addColorStop(0, "#000");
+        gr.addColorStop(1, "rgba(0, 0, 0, 0)");
+        g.fillStyle = gr;
+        g.fillRect(dx, dy, dw, dh);
+      };
+      if (f.top) shade(0, dy, 0, dy + f.top * dh);
+      if (f.bottom) shade(0, dy + dh, 0, dy + dh - f.bottom * dh);
+      if (f.left) shade(dx, 0, dx + f.left * dw, 0);
+      if (f.right) shade(dx + dw, 0, dx + dw - f.right * dw, 0);
+    }
+    // Unele browsere nu pot scrie WebP și întorc alt tip; atunci trecem la următoarea variantă.
+    const tries = spec.fit === "clear" ? [["image/webp", 0.9], ["image/png"]] : [["image/webp", 0.84], ["image/jpeg", 0.86], ["image/webp", 0.6], ["image/jpeg", 0.6]];
+    for (const [type, q] of tries) {
+      const blob = await new Promise((resolve) => c.toBlob(resolve, type, q));
+      if (blob && blob.type === type && blob.size <= MAX_UPLOAD) return blob;
+    }
+    throw new Error("Imaginea a rămas prea mare și după micșorare. Alegeți o imagine mai simplă.");
+  }
+  const toBase64 = (blob) => new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(String(r.result).split(",")[1] || "");
+    r.onerror = () => reject(new Error("Imaginea nu a putut fi pregătită pentru trimitere. Încercați din nou."));
+    r.readAsDataURL(blob);
+  });
+  async function pickImage(spec, file) {
+    imgBusy.add(spec.id);
+    delete imgErr[spec.id];
+    render();
+    try {
+      const blob = await shrink(file, spec);
+      const r = await api("POST", "admin/image", { slot: spec.id, data: await toBase64(blob) });
+      if (doc) doc.site.images[spec.id] = r.url;
+    } catch (e) { imgErr[spec.id] = e.message; }
+    imgBusy.delete(spec.id);
+    changed();
+  }
+  function viewImagini() {
+    const im = doc.site.images, saved = JSON.parse(origJson).site.images;
+    return [h("h1", null, "Imagini"),
+      h("p", { class: "lead" }, "Imaginile de pe site. Alegeți un fișier de pe telefon sau de pe calculator, iar panoul îl aduce singur la mărimea potrivită. Pe site apare abia după ce apăsați „Salvați”."),
+      IMAGES.map((spec) => {
+        const cur = im[spec.id], first = cur === DEF.images[spec.id], busy = imgBusy.has(spec.id);
+        const file = h("input", { type: "file", accept: "image/png,image/jpeg,image/webp", hidden: true, "aria-hidden": "true", tabindex: "-1" });
+        file.addEventListener("change", () => { if (file.files[0]) pickImage(spec, file.files[0]); });
+        const state = busy ? "Se pregătește și se trimite imaginea…"
+          : cur !== saved[spec.id] ? (first ? "Ați revenit la imaginea de la început." : "Imagine nouă.") + " Apare pe site după ce apăsați „Salvați”."
+          : first ? "Acum pe site: imaginea de la început." : "Acum pe site: o imagine încărcată din panou.";
+        return h("section", { class: "imgcard" },
+          h("div", { class: "imgprev imgprev-" + spec.fit }, h("img", { src: media(cur), alt: "", width: spec.w, height: spec.h, loading: "lazy" })),
+          h("div", { class: "imginfo" },
+            h("h2", null, spec.name),
+            h("p", { class: "hint" }, spec.hint),
+            h("p", { class: "imgstate", role: "status" }, state),
+            imgErr[spec.id] ? h("p", { class: "err" }, imgErr[spec.id]) : null,
+            file,
+            h("div", { class: "adm-tools" },
+              mini("Alegeți altă imagine", busy, () => file.click()),
+              mini("Reveniți la imaginea de la început", busy || first, () => { im[spec.id] = DEF.images[spec.id]; delete imgErr[spec.id]; changed(); }))));
+      }),
+      h("p", { class: "hint" }, "Iconița din fila browserului și cea de pe ecranul telefonului nu se schimbă de aici: sunt fișierele icon-*.png din folderul public/assets.")];
+  }
+
   // ---- Prețuri
-  const PRODUCTS = [["modul", "Un singur test", "Deblochează un test, la alegerea omului."], ["pachet", "Toate testele", "Deblochează toate testele, tarotul, raportul care le leagă și testul de cuplu."], ["cuplu", "Testul de cuplu", "Deblochează raportul de cuplu. Plătește unul singur, pentru amândoi."]];
+  const PRODUCTS =[["modul", "Un singur test", "Deblochează un test, la alegerea omului."], ["pachet", "Toate testele", "Deblochează toate testele, tarotul, raportul care le leagă și testul de cuplu."], ["cuplu", "Testul de cuplu", "Deblochează raportul de cuplu. Plătește unul singur, pentru amândoi."]];
   function viewPreturi() {
     const s = doc.site.settings, P = s.products;
     const pct = h("input", { class: "input", id: "bulk-pct", inputmode: "decimal", placeholder: "10", autocomplete: "off" });
@@ -615,7 +727,7 @@
   }
 
   // ---- Setări
-  const EVENTS = { autentificare: "Intrare în cont", "autentificare-esuata": "Parolă greșită", iesire: "Ieșire din cont", "parola-schimbata": "Parolă schimbată", salvare: "Salvare", restaurare: "Restaurare", "cod-creat": "Cod promo creat", "cod-schimbat": "Cod promo schimbat", "cod-sters": "Cod promo șters", "export-email": "Descărcare adrese de e-mail" };
+  const EVENTS = { autentificare: "Intrare în cont", "autentificare-esuata": "Parolă greșită", iesire: "Ieșire din cont", "parola-schimbata": "Parolă schimbată", salvare: "Salvare", restaurare: "Restaurare", "imagine-incarcata": "Imagine încărcată", "cod-creat": "Cod promo creat", "cod-schimbat": "Cod promo schimbat", "cod-sters": "Cod promo șters", "export-email": "Descărcare adrese de e-mail" };
   function viewSetari() {
     const s = doc.site.settings;
     const lazy = (load, draw) => { const box = h("div", { class: "table" }, h("p", { class: "muted" }, "Se încarcă…")); load().then((d) => box.replaceChildren(...[draw(d)].flat(3).filter(Boolean)), (e) => box.replaceChildren(h("p", { class: "err" }, e.message))); return box; };
@@ -710,12 +822,12 @@
       } }, h("div", { class: "field" }, h("label", { for: "pw-cur" }, "Parola de acum"), cur), h("div", { class: "field" }, h("label", { for: "pw-new" }, "Parola nouă"), next, h("p", { class: "hint" }, "Cel puțin 12 caractere.")),
         h("div", { class: "field" }, h("label", { for: "pw-again" }, "Parola nouă, încă o dată"), again), pwMsg, h("div", { class: "actions" }, h("button", { class: "btn btn-line", type: "submit" }, "Schimbați parola")))),
       group("s:log", "Jurnal", "Ultimele intrări în cont, salvări și restaurări.", () => lazy(() => api("GET", "admin/audit"), (d) =>
-        d.lines.length ? d.lines.map((l) => h("div", { class: "trow" }, h("b", null, EVENTS[l.event] || l.event), h("span", { class: "muted" }, [when(l.at), l.email, l.cod ? "cod " + l.cod : "", l.din ? "s-a revenit la " + l.din : "", l.rev ? (l.din ? "a rezultat versiunea " : "versiunea ") + l.rev : "", "IP " + l.ip].filter(Boolean).join(", ")))) : h("p", { class: "muted" }, "Jurnalul este gol."))),
+        d.lines.length ? d.lines.map((l) => h("div", { class: "trow" }, h("b", null, EVENTS[l.event] || l.event), h("span", { class: "muted" }, [when(l.at), l.email, l.cod ? "cod " + l.cod : "", l.loc ? "pentru „" + ((IMAGES.find((x) => x.id === l.loc) || {}).name || l.loc) + "”, " + l.kb + " KB" : "", l.din ? "s-a revenit la " + l.din : "", l.rev ? (l.din ? "a rezultat versiunea " : "versiunea ") + l.rev : "", "IP " + l.ip].filter(Boolean).join(", ")))) : h("p", { class: "muted" }, "Jurnalul este gol."))),
       // Versiunea care rulează pe server, din package.json. Apare doar aici, niciodată pe site.
       version && version.number ? h("p", { class: "adm-version" }, "v" + version.number + (version.date ? " · urcată pe " + day(version.date) : "")) : null];
   }
 
-  const VIEWS = { texte: viewTexte, preturi: viewPreturi, teste: viewTeste, rapid: viewRapid, cuplu: viewCuplu, tarot: viewTarot, raport: viewRaport, coduri: viewCoduri, setari: viewSetari };
+  const VIEWS = { texte: viewTexte, imagini: viewImagini, preturi: viewPreturi, teste: viewTeste, rapid: viewRapid, cuplu: viewCuplu, tarot: viewTarot, raport: viewRaport, coduri: viewCoduri, setari: viewSetari };
 
   // ---- Pornire
   (async function start() {

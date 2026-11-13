@@ -28,6 +28,7 @@
     from(v, enc) {
       if (typeof v !== "string") return new Buf(v);
       if (enc === "hex") return new Buf((v.match(/../g) || []).map((x) => parseInt(x, 16)));
+      if (enc === "base64") return new Buf(Array.from(atob(v), (c) => c.charCodeAt(0)));
       return new Buf(new TextEncoder().encode(v));
     },
     concat(list) {
@@ -124,12 +125,15 @@
   // Singurul fișier „de pe server” care există în demo: package.json, cu versiunea pusă de tools/build-demo.js.
   const PKG = window.CUPIDON_DEMO_PACKAGE || null;
   const isPkg = (file) => !!PKG && file === "/package.json";
+  // Fișierele care nu sunt text (imaginile încărcate din panou) se țin ca base64, cu „b64:” în față.
+  // Ora scrierii se ține minte doar cât e deschisă pagina: după o reîncărcare, tot ce a rămas nefolosit pare vechi și se șterge.
+  const written = new Map();
   const fsShim = {
     readFileSync(file) { if (isPkg(file)) return JSON.stringify({ version: PKG.version }); const v = disk.get(file); if (v == null) throw missing(file); return v; },
-    writeFileSync(file, data) { disk.set(file, String(data)); },
+    writeFileSync(file, data) { disk.set(file, data instanceof Uint8Array ? "b64:" + new Buf(data).toString("base64") : String(data)); written.set(file, Date.now()); },
     // Jurnalul: păstrăm doar ultimele 200 de rânduri, fiindcă locul din browser e mic.
     appendFileSync(file, data) { disk.set(file, ((disk.get(file) || "") + data).split("\n").slice(-201).join("\n")); },
-    renameSync(from, to) { const v = disk.get(from); if (v == null) throw missing(from); disk.remove(from); disk.set(to, v); },
+    renameSync(from, to) { const v = disk.get(from); if (v == null) throw missing(from); disk.remove(from); disk.set(to, v); written.set(to, written.get(from) || 0); written.delete(from); },
     unlinkSync(file) { if (disk.get(file) == null) throw missing(file); disk.remove(file); },
     mkdirSync() {},
     readdirSync(dir) {
@@ -138,7 +142,7 @@
       for (const k of disk.keys()) if (k.startsWith(pre)) names.add(k.slice(pre.length).split("/")[0]);
       return [...names];
     },
-    statSync(file) { if (isPkg(file)) return { size: 0, mtime: new Date(PKG.date), isFile: () => true }; const v = disk.get(file); if (v == null) throw missing(file); return { size: v.length, isFile: () => true }; }
+    statSync(file) { if (isPkg(file)) return { size: 0, mtime: new Date(PKG.date), isFile: () => true }; const v = disk.get(file); if (v == null) throw missing(file); return { size: v.length, mtimeMs: written.get(file) || 0, isFile: () => true }; }
   };
 
   // ---- Căi de fișiere, în stil „/a/b”
@@ -276,5 +280,17 @@
   }
   if (document.body) strip(); else document.addEventListener("DOMContentLoaded", strip);
 
-  window.CUPIDON_DEMO = { sha256: sha256hex };
+  // Adresa unei imagini, așa cum o poate arăta pagina în demo. Cele încărcate din panou („/media/…”) stau în browser
+  // și se dau ca adresă „data:”; celelalte („/assets/…”) se iau de lângă pagină, fiindcă demo-ul stă într-un subfolder.
+  const UPLOADS = load("config").DATA_DIR + "/uploads/";
+  const IMAGE_TYPES = { webp: "image/webp", png: "image/png", jpg: "image/jpeg" };
+  function media(u) {
+    u = String(u || "");
+    const m = /^\/media\/([A-Za-z0-9-]+\.(webp|png|jpg))$/.exec(u);
+    if (!m) return u.replace(/^\/(?!\/)/, "");
+    const v = disk.get(UPLOADS + m[1]);
+    return v && v.startsWith("b64:") ? "data:" + IMAGE_TYPES[m[2]] + ";base64," + v.slice(4) : "";
+  }
+
+  window.CUPIDON_DEMO = { sha256: sha256hex, media };
 })();

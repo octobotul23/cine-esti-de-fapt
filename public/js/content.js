@@ -58,6 +58,16 @@
       { id: "tarot", name: "Tarot", tagline: "Cartea zilei, cartea ta personală și o etalare de trei cărți.", on: true }
     ],
 
+    // Imaginile site-ului. Se schimbă din panou, din secțiunea Imagini: acolo se încarcă o imagine nouă,
+    // iar aici ajunge adresa ei (/media/…). Valorile de mai jos sunt fișierele din public/assets.
+    images: {
+      heroMan: "/assets/hero-barbat.webp",
+      heroWoman: "/assets/hero-femeie.webp",
+      heroMind: "/assets/hero-creier.webp",
+      logo: "/assets/logo.webp",
+      tarotBack: "/assets/tarot-spate.webp"
+    },
+
     home: {
       // Partea de sus a primei pagini
       heroSub: "Crezi că te cunoști? Descoperă ce nu vezi la tine.",

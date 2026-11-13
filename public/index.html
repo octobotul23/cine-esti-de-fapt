@@ -17,7 +17,7 @@
 <body data-world="eu">
   <a class="skip" href="#app">Sari la conținut</a>
 
-  <!-- Desenele refolosite în pagină: degradeul neon și iconițele. Fețele, creierul și sigla sunt imagini din /assets. -->
+  <!-- Desenele refolosite în pagină: degradeul neon și iconițele. Fețele, creierul și sigla sunt imagini din /assets; cele marcate cu data-img se pot schimba din panou (Imagini). -->
   <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
     <defs>
       <linearGradient id="g-neon" x1="0" y1="0" x2="1" y2="1">
@@ -40,7 +40,7 @@
 
   <header class="top" data-group="Meniu și subsol">
     <a class="brand" href="#/" aria-label="Prima pagină">
-      <img class="logo" src="/assets/logo.webp" alt="" width="192" height="192">
+      <img class="logo" data-img="logo" src="/assets/logo.webp" alt="" width="192" height="192">
       <span class="brand-name" data-text="settings.siteName">Cine ești, de fapt?</span>
     </a>
     <nav class="nav" aria-label="Meniu">
@@ -61,9 +61,9 @@
     <div id="home" class="view home" data-group="Prima pagină">
       <section class="hero">
         <div class="hero-art" aria-hidden="true">
-          <img class="face face-l" src="/assets/hero-barbat.webp" alt="" width="602" height="1000" fetchpriority="high">
-          <img class="mind" src="/assets/hero-creier.webp" alt="" width="640" height="640">
-          <img class="face face-r" src="/assets/hero-femeie.webp" alt="" width="602" height="1000" fetchpriority="high">
+          <img class="face face-l" data-img="heroMan" src="/assets/hero-barbat.webp" alt="" width="602" height="1000" fetchpriority="high">
+          <img class="mind" data-img="heroMind" src="/assets/hero-creier.webp" alt="" width="640" height="640">
+          <img class="face face-r" data-img="heroWoman" src="/assets/hero-femeie.webp" alt="" width="602" height="1000" fetchpriority="high">
         </div>
         <h1 class="hero-title" data-text="settings.siteName">Cine ești, de fapt?</h1>
         <p class="hero-sub" data-edit="home.heroSub" data-label="Rândul de sub titlul mare">Crezi că te cunoști? Descoperă ce nu vezi la tine.</p>

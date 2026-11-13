@@ -20,8 +20,16 @@ function writeJson(file, value) {
   fs.renameSync(tmp, file);
 }
 
+// La fel, pentru un fișier oarecare (de exemplu o imagine încărcată din panou).
+function writeFile(file, data) {
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  const tmp = `${file}.${process.pid}.${Date.now()}.${Math.random().toString(36).slice(2, 8)}.tmp`;
+  fs.writeFileSync(tmp, data, { mode: 0o600 });
+  fs.renameSync(tmp, file);
+}
+
 function remove(file) {
   try { fs.unlinkSync(file); } catch (e) { if (e.code !== "ENOENT") throw e; }
 }
 
-module.exports = { readJson, writeJson, remove };
+module.exports = { readJson, writeJson, writeFile, remove };

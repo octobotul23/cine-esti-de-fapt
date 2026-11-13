@@ -5,6 +5,8 @@
 const MAX_TEXT = 3000;
 const MAX_LIST = 400;
 const ID_RE = /^[A-Za-z0-9_]{1,24}$/;
+// Adresa unei imagini încărcate din panou. Numele îl dă serverul: locul imaginii, 16 caractere la întâmplare, tipul.
+const MEDIA_RE = /^\/media\/[A-Za-z]{1,24}-[a-f0-9]{16}\.(webp|png|jpg)$/;
 const isObj = (v) => v !== null && typeof v === "object" && !Array.isArray(v);
 const clone = (v) => JSON.parse(JSON.stringify(v));
 
@@ -86,6 +88,12 @@ function validateDoc(input, defaults) {
   for (const [k, p] of Object.entries(s.products)) {
     if (!(p.price >= 0 && p.price <= 100000) || Math.round(p.price * 100) !== Math.round(p.price * 10000) / 100) errs.push("Prețuri → " + (p.name || k) + ": prețul trebuie să fie între 0 și 100.000, cu cel mult două zecimale.");
     if (!p.name.trim()) errs.push("Prețuri: numele produsului „" + k + "” nu poate fi gol.");
+  }
+
+  // O imagine este fie cea de la început, fie una încărcată din panou pentru exact acel loc. Nicio altă adresă nu trece.
+  for (const [k, first] of Object.entries(defaults.site.images)) {
+    const v = site.images[k];
+    if (v !== first && !(MEDIA_RE.test(v) && v.startsWith("/media/" + k + "-"))) errs.push("Imagini: una dintre imagini nu are o adresă bună. Alegeți din nou imaginea, din secțiunea Imagini a panoului.");
   }
 
   const ids = Object.keys(defaults.tests.modules);

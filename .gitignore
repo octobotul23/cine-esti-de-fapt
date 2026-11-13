@@ -7,3 +7,5 @@ dist/
 # Cheile procesatorilor de plăți. Nu se pun niciodată în git.
 .env
 .env.*
+# Pachetele păstrate ale fiecărei versiuni (npm run demo). Rămân doar pe calculator.
+versions/

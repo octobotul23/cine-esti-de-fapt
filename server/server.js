@@ -4,6 +4,7 @@
 const http = require("http");
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const cfg = require("./config");
 const store = require("./store");
 const auth = require("./auth");
@@ -18,6 +19,11 @@ const { httpError } = auth;
 const SITE_FILE = path.join(cfg.DATA_DIR, "site.json");
 const HISTORY_DIR = path.join(cfg.DATA_DIR, "history");
 const AUDIT_FILE = path.join(cfg.DATA_DIR, "audit.log");
+// Imaginile încărcate din panou. Singurul loc din folderul de date din care se servește ceva, și doar prin /media/.
+const UPLOAD_DIR = path.join(cfg.DATA_DIR, "uploads");
+const MEDIA_RE = /^[A-Za-z]{1,24}-[a-f0-9]{16}\.(webp|png|jpg)$/;
+const MAX_IMAGE = 1024 * 1024;
+const UPLOAD_GRACE = 24 * 3600 * 1000;
 const DEFAULTS = { site: SITE, tests: TESTS };
 
 const MIME = {
@@ -57,6 +63,54 @@ function listHistory() {
     const v = store.readJson(path.join(HISTORY_DIR, f), null) || {};
     return { id: f, rev: v.rev || 0, updated: v.updated || null, by: v.by || "", note: v.note || "" };
   });
+}
+
+// ---- Imaginile încărcate din panou
+// Ce fel de imagine este, după primii octeți. Numele fișierului și tipul spus de browser nu contează.
+function imageKind(b) {
+  if (b.length < 16) return "";
+  const at = (i, ...bytes) => bytes.every((x, n) => b[i + n] === x);
+  if (at(0, 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)) return "png";
+  if (at(0, 0xff, 0xd8, 0xff)) return "jpg";
+  if (at(0, 0x52, 0x49, 0x46, 0x46) && at(8, 0x57, 0x45, 0x42, 0x50)) return "webp";
+  return "";
+}
+function saveImage(slot, data) {
+  if (!Object.prototype.hasOwnProperty.call(SITE.images, slot)) throw httpError(400, "Imaginea nu a fost încărcată: locul ei de pe site nu a fost recunoscut. Reîncărcați panoul și încercați din nou.");
+  if (typeof data !== "string" || !data) throw httpError(400, "Imaginea nu a ajuns la server. Alegeți-o din nou.");
+  if (data.length > Math.ceil(MAX_IMAGE / 3) * 4) throw httpError(400, "Imaginea este prea mare (cel mult 1 MB după micșorare). Alegeți o imagine mai mică sau salvați-o ca JPG.");
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(data)) throw httpError(400, "Imaginea nu a putut fi citită. Alegeți-o din nou.");
+  const buf = Buffer.from(data, "base64");
+  const kind = imageKind(buf);
+  if (!kind) throw httpError(400, "Fișierul nu este o imagine PNG, JPG sau WebP. Alegeți o imagine în unul dintre aceste formate.");
+  const name = slot + "-" + crypto.randomBytes(8).toString("hex") + "." + kind;
+  store.writeFile(path.join(UPLOAD_DIR, name), buf);
+  return { name, size: buf.length };
+}
+const uploadExists = (name) => { try { return fs.statSync(path.join(UPLOAD_DIR, name)).isFile(); } catch (e) { return false; } };
+// Primul loc a cărui imagine încărcată nu mai este pe server (sau null, dacă toate sunt la locul lor).
+function lostImage(site) {
+  for (const [k, v] of Object.entries(site.images)) if (v !== SITE.images[k] && !uploadExists(v.slice(7))) return k;
+  return null;
+}
+// Șterge imaginile încărcate pe care nu le mai folosește nici site-ul, nici vreo versiune păstrată.
+// Cele încărcate în ultima zi rămân: pot ține de o modificare încă nesalvată din panou.
+function sweepUploads() {
+  let files = [];
+  try { files = fs.readdirSync(UPLOAD_DIR).filter((f) => MEDIA_RE.test(f)); } catch (e) { return 0; }
+  if (!files.length) return 0;
+  const used = new Set();
+  const note = (doc) => { for (const v of Object.values((doc && doc.site && doc.site.images) || {})) if (typeof v === "string" && v.startsWith("/media/")) used.add(v.slice(7)); };
+  note(getDoc());
+  for (const h of listHistory()) note((store.readJson(path.join(HISTORY_DIR, h.id), null) || {}).doc);
+  let removed = 0;
+  for (const f of files) {
+    if (used.has(f)) continue;
+    let at = 0;
+    try { at = fs.statSync(path.join(UPLOAD_DIR, f)).mtimeMs || 0; } catch (e) { continue; }
+    if (Date.now() - at > UPLOAD_GRACE) { store.remove(path.join(UPLOAD_DIR, f)); removed += 1; }
+  }
+  return removed;
 }
 
 // Ce are voie să știe browserul despre teste: numere, nu întrebări.
@@ -508,9 +562,20 @@ async function adminApi(req, res, parts) {
     const s = guard(req);
     const result = validateDoc(body.doc, DEFAULTS);
     if (result.errors) throw httpError(400, "Nu am salvat. " + result.errors[0], { errors: result.errors });
+    if (lostImage(result.doc.site)) throw httpError(400, "Nu am salvat. O imagine nouă din secțiunea Imagini nu mai este pe server (a stat nesalvată mai mult de o zi). Alegeți-o din nou, apoi apăsați „Salvați”.");
     const d = saveDoc(result.doc, s.email, body.note, body.rev);
     audit(req, "salvare", { email: s.email, rev: d.rev });
     return sendJson(res, 200, { rev: d.rev, updated: d.updated, by: d.by, doc: { site: d.site, tests: d.tests } });
+  }
+  // O imagine nouă pentru site. Aici doar se păstrează fișierul; pe site ajunge când adresa ei e salvată cu „Salvați”.
+  if (route === "POST admin/image") {
+    const s = guard(req);
+    limit(req, "imagine", 40, 600000);
+    const slot = String(body.slot || "");
+    const saved = saveImage(slot, body.data);
+    audit(req, "imagine-incarcata", { email: s.email, loc: slot, kb: Math.max(1, Math.round(saved.size / 1024)) });
+    try { sweepUploads(); } catch (e) { console.error("Nu am putut șterge imaginile vechi:", e.message); }
+    return sendJson(res, 200, { url: "/media/" + saved.name });
   }
   if (route === "GET admin/history") {
     adminSession(req);
@@ -627,6 +692,18 @@ function serveStatic(req, res, pathname) {
     fs.createReadStream(file).pipe(res);
   });
 }
+// Imaginile încărcate din panou. Numele trebuie să fie exact de forma dată de server; orice altceva nu există.
+function serveMedia(req, res, name) {
+  if (!MEDIA_RE.test(name)) return notFound(res);
+  const file = path.join(UPLOAD_DIR, name);
+  fs.stat(file, (err, st) => {
+    if (err || !st.isFile()) return notFound(res);
+    // Numele se schimbă la fiecare încărcare, deci browserul poate ține fișierul oricât.
+    res.writeHead(200, baseHeaders({ "Content-Type": MIME[path.extname(name)], "Cache-Control": "public, max-age=31536000, immutable", "Content-Length": st.size }));
+    if (req.method === "HEAD") return res.end();
+    fs.createReadStream(file).pipe(res);
+  });
+}
 function notFound(res) {
   res.writeHead(404, baseHeaders({ "Content-Type": "text/plain; charset=utf-8" }));
   res.end("Pagina nu există.");
@@ -653,6 +730,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, baseHeaders({ "Content-Type": "application/xml; charset=utf-8" }));
       return res.end('<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>' + origin + "/</loc></url></urlset>\n");
     }
+    if (pathname.startsWith("/media/")) return serveMedia(req, res, pathname.slice(7));
     return serveStatic(req, res, pathname);
   } catch (e) {
     if (res.headersSent) return res.end();
@@ -665,6 +743,7 @@ const server = http.createServer(async (req, res) => {
 if (require.main === module) {
   fs.mkdirSync(cfg.DATA_DIR, { recursive: true });
   const removed = people.purgeOld();
+  try { sweepUploads(); } catch (e) { console.error("Nu am putut șterge imaginile vechi:", e.message); }
   setInterval(() => people.purgeOld(), 24 * 3600 * 1000).unref();
   server.listen(cfg.PORT, cfg.HOST, () => {
     console.log("Site:   http://localhost:" + cfg.PORT + "/");

@@ -81,6 +81,33 @@ async function call(method, url, body, headers = {}) {
   r = await call("POST", "/api/admin/promos", { code: "p150", type: "percent", percent: 150 }, A); ok(r.status === 400, "procent 150 refuzat");
   r = await call("POST", "/api/admin/promos", { code: "jum", type: "percent", percent: 50 }, A);
 
+  console.log("imagini");
+  const PNG = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="; // un punct, 1 × 1
+  const up = (slot, data, headers) => call("POST", "/api/admin/image", { slot, data }, headers);
+  r = await up("logo", PNG); ok(r.status === 401, "încărcare fără sesiune");
+  r = await up("logo", PNG, { Cookie: cookie }); ok(r.status === 403, "încărcare fără CSRF");
+  r = await up("logo", PNG, { ...A, Origin: "http://evil.example" }); ok(r.status === 403, "încărcare din altă origine");
+  r = await up("altceva", PNG, A); ok(r.status === 400, "loc necunoscut: " + (r.j && r.j.error));
+  r = await up("logo", Buffer.from("<svg xmlns='http://www.w3.org/2000/svg'><script>alert(1)</script></svg>").toString("base64"), A); ok(r.status === 400 && /PNG, JPG sau WebP/.test(r.j.error), "SVG refuzat: " + (r.j && r.j.error));
+  r = await up("logo", "nu e base64 !!", A); ok(r.status === 400, "date necitibile refuzate");
+  r = await up("logo", Buffer.concat([Buffer.from(PNG, "base64"), Buffer.alloc(1024 * 1024)]).toString("base64"), A); ok(r.status === 400 && /prea mare/.test(r.j.error), "imagine peste 1 MB refuzată");
+  r = await up("logo", PNG, A); const img = r.j.url; ok(r.status === 200 && /^\/media\/logo-[a-f0-9]{16}\.png$/.test(img), "imagine încărcată: " + img);
+  r = await fetch(B + img); const bytes = Buffer.from(await r.arrayBuffer());
+  ok(r.status === 200 && r.headers.get("content-type") === "image/png" && r.headers.get("x-content-type-options") === "nosniff" && /immutable/.test(r.headers.get("cache-control")) && bytes.equals(Buffer.from(PNG, "base64")), "imaginea se servește întreagă, ca image/png");
+  for (const bad of ["/media/site.json", "/media/users.json", "/media/%2e%2e%2fsite.json", "/media/" + img.slice(7) + "/../../site.json", "/data-smoke/site.json", "/data-smoke/uploads/" + img.slice(7)]) { r = await call("GET", bad); ok(r.status === 404, "nu se servește " + bad); }
+  ok(fs.readdirSync(path.join(root, "data-smoke/uploads")).join() === img.slice(7), "în folderul de imagini este doar fișierul încărcat, fără resturi");
+  r = await call("GET", "/api/site"); ok(r.j.site.images.logo === "/assets/logo.webp", "imaginea nu apare pe site înainte de „Salvați”");
+  doc.site.images.logo = "https://evil.example/x.png";
+  r = await call("PUT", "/api/site", { rev: 2, doc }, A); ok(r.status === 400 && /Imagini/.test(r.j.error), "adresă din afară refuzată: " + (r.j && r.j.error));
+  doc.site.images.logo = img.replace("logo-", "heroMan-");
+  r = await call("PUT", "/api/site", { rev: 2, doc }, A); ok(r.status === 400 && /Imagini/.test(r.j.error), "imaginea altui loc refuzată");
+  doc.site.images.logo = "/media/logo-0123456789abcdef.png";
+  r = await call("PUT", "/api/site", { rev: 2, doc }, A); ok(r.status === 400 && /nu mai este pe server/.test(r.j.error), "imagine care lipsește de pe server: " + (r.j && r.j.error));
+  doc.site.images.logo = img;
+  r = await call("PUT", "/api/site", { rev: 2, doc }, A); ok(r.status === 200 && r.j.rev === 3, "salvare cu imaginea nouă");
+  r = await call("GET", "/api/site"); ok(r.j.site.images.logo === img && r.j.site.images.heroMan === "/assets/hero-barbat.webp", "site: sigla nouă, restul imaginilor neschimbate");
+  r = await call("GET", "/api/admin/audit", undefined, A); ok(r.j.lines.some((l) => l.event === "imagine-incarcata" && l.loc === "logo"), "încărcarea apare în jurnal");
+
   console.log("plată");
   const items3 = [{ type: "modul", id: "bigfive" }, { type: "modul", id: "iq" }, { type: "modul", id: "tarot" }];
   r = await call("POST", "/api/pay/quote", { items: items3 }, P); ok(r.j.total === 59.97, "3 teste = " + r.j.total);

@@ -18,6 +18,8 @@ const ROOT = path.resolve(__dirname, "..");
 const PUBLIC = path.join(ROOT, "public");
 const OUT = path.join(ROOT, "dist", "demo");
 const ZIP = path.join(ROOT, "dist", "cupidon-demo.zip");
+// Fiecare build își păstrează pachetul aici (versions/v0.6.0/…), cu o listă alături. Nu se șterge nimic automat; folderul nu se urcă pe git.
+const VERSIONS = path.join(ROOT, "versions");
 // Modulele serverului care rulează în browser. auth.js lipsește intenționat: demo-ul nu are parole.
 const SERVER_MODULES = ["config", "store", "people", "pay", "scoring", "validate", "tests", "server"];
 const PROVIDED = ["fs", "path", "crypto", "http", "auth", "content"];
@@ -76,7 +78,7 @@ fs.writeFileSync(path.join(OUT, "js", "demo-server.js"), bundle);
 async function selfCheck() {
   const mem = new Map();
   const win = {
-    console, URL, URLSearchParams, Response, Headers, TextEncoder, TextDecoder, btoa, queueMicrotask, setTimeout,
+    console, URL, URLSearchParams, Response, Headers, TextEncoder, TextDecoder, btoa, atob, queueMicrotask, setTimeout,
     crypto: nodeCrypto.webcrypto, fetch: () => Promise.reject(new Error("fără rețea")),
     location: { host: "demo.test", protocol: "https:", hash: "", href: "" },
     document: { body: null, addEventListener() {} },
@@ -115,6 +117,16 @@ async function selfCheck() {
   saved.doc.site.settings.siteName = "Nume schimbat din panou";
   need((await call("PUT", "site", { doc: saved.doc, rev: saved.rev, note: "probă" })).rev === saved.rev + 1, "salvarea din panou nu a mers");
   need((await call("GET", "site")).site.settings.siteName === "Nume schimbat din panou", "ce s-a salvat din panou nu apare pe site");
+  // O imagine încărcată din panou: rămâne în browser și pagina o primește ca adresă „data:”.
+  const png = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
+  const up = await call("POST", "admin/image", { slot: "logo", data: png });
+  need(/^\/media\/logo-[a-f0-9]{16}\.png$/.test(up.url), "imaginea încărcată nu a primit o adresă");
+  need(win.CUPIDON_DEMO.media(up.url) === "data:image/png;base64," + png, "imaginea încărcată nu se poate arăta în demo");
+  need(win.CUPIDON_DEMO.media("/assets/logo.webp") === "assets/logo.webp", "imaginile de la început nu au adresă relativă în demo");
+  const withImage = await call("GET", "admin/doc");
+  withImage.doc.site.images.logo = up.url;
+  await call("PUT", "site", { doc: withImage.doc, rev: withImage.rev, note: "probă imagine" });
+  need((await call("GET", "site")).site.images.logo === up.url, "imaginea salvată din panou nu apare pe site");
 }
 
 // ---- 5. Arhiva .zip (nume cu „/”, fără foldere goale, index.html sus: așa o cere demo.iluz.ro)
@@ -172,6 +184,15 @@ function serve(port) {
   console.log("Demo făcut și probat: " + files.length + " fișiere.");
   console.log("Folder:  " + OUT);
   console.log("Arhivă:  " + ZIP + "  (" + Math.round(fs.statSync(ZIP).size / 1024) + " KB)");
+  const v = "v" + require(path.join(ROOT, "package.json")).version, kept = path.join(VERSIONS, v, "cupidon-demo.zip");
+  fs.mkdirSync(path.dirname(kept), { recursive: true });
+  fs.copyFileSync(ZIP, kept);
+  const listFile = path.join(VERSIONS, "versions.txt");
+  let lines = [];
+  try { lines = fs.readFileSync(listFile, "utf8").split(/\r?\n/).filter((l) => l.trim() && !l.startsWith(v + "\t")); } catch (e) { /* prima versiune păstrată */ }
+  lines.push([v, new Date().toISOString().slice(0, 16).replace("T", " "), v + "/cupidon-demo.zip", Math.round(fs.statSync(kept).size / 1024) + " KB"].join("\t"));
+  fs.writeFileSync(listFile, lines.join("\n") + "\n");
+  console.log("Păstrat: " + kept);
   const arg = process.argv.find((a) => a.startsWith("--serve"));
   if (arg) serve(Number(arg.split("=")[1]) || 5183);
 })();
