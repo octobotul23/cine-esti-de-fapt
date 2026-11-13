@@ -62,7 +62,7 @@ function listHistory() {
 // Ce are voie să știe browserul despre teste: numere, nu întrebări.
 function publicSite() {
   const doc = getDoc();
-  const meta = { modules: {}, couple: { free: doc.tests.couple.questions.filter((q) => q.free).length, total: doc.tests.couple.questions.length } };
+  const meta = { modules: {}, couple: { free: doc.tests.couple.questions.filter((q) => q.free).length, total: doc.tests.couple.questions.length }, quick: { total: doc.tests.quick.questions.length } };
   for (const [id, mod] of Object.entries(doc.tests.modules)) {
     meta.modules[id] = mod.type === "tarot" ? { type: "tarot", cards: mod.cards.length, spread: mod.positions.length }
       : { type: mod.type, free: mod.questions.filter((q) => q.free).length, total: mod.questions.length };
@@ -215,6 +215,16 @@ async function publicApi(req, res, parts) {
   if (route === "POST profile") {
     limit(req, "profile", 30, 3600000);
     return sendJson(res, 200, { token: people.createProfile() });
+  }
+
+  // ---- Testul rapid: gratuit, fără profil. Răspunsurile nu se păstrează pe server.
+  if (route === "GET quick" || route === "POST quick") {
+    if (!doc.site.quick.on) throw httpError(404, "Acest test nu este disponibil.");
+    const qs = doc.tests.quick.questions;
+    if (method === "GET") return sendJson(res, 200, { questions: qs.map((q) => ({ id: q.id, text: q.text, options: q.options.map((o) => o.text) })) });
+    const sent = body.answers;
+    if (!sent || typeof sent !== "object" || !sc.quickComplete(qs, sent)) throw httpError(400, "Răspunde la toate întrebările ca să vezi rezultatul.");
+    return sendJson(res, 200, sc.quickResult(doc.tests.quick, sent, doc.site.modules.filter((m) => m.on && doc.tests.modules[m.id])));
   }
 
   if (route === "GET me") {

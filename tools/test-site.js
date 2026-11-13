@@ -25,6 +25,19 @@ async function call(method, url, body, headers = {}) {
   r = await call("GET", "/js/content.js"); ok(r.status === 200 && r.headers.get("content-security-policy").includes("script-src 'self'"), "content.js + CSP");
   r = await call("GET", "/api/site"); ok(r.j.meta.modules.bigfive.total === 50 && !r.t.includes("Îmi place să încerc activități"), "site fără întrebări");
 
+  console.log("test rapid");
+  ok(r.j.meta.quick.total === 10 && !r.t.includes("Spui lucrurilor pe nume"), "site: 10 întrebări rapide, fără textele de rezultat");
+  r = await call("GET", "/api/quick"); const quick = r.j.questions;
+  ok(quick.length === 10 && typeof quick[0].options[0] === "string" && !r.t.includes('"right"') && !r.t.includes("Spui lucrurilor pe nume"), "întrebări fără răspunsuri corecte și fără note");
+  r = await call("POST", "/api/quick", { answers: { r01: 0 } }); ok(r.status === 400, "test rapid incomplet: " + (r.j && r.j.error));
+  r = await call("POST", "/api/quick", { answers: Object.fromEntries(quick.map((q) => [q.id, 9])) }); ok(r.status === 400, "răspuns în afara variantelor refuzat");
+  const qa = {}; TESTS.quick.questions.forEach((q) => { qa[q.id] = Math.max(0, q.options.findIndex((o) => o.right)); });
+  r = await call("POST", "/api/quick", { answers: qa });
+  ok(r.j.score.correct === 5 && r.j.score.total === 5 && r.j.score.title === TESTS.quick.levels.high.title && r.j.choices.length === 5 && r.j.review.length === 5, "rezultat rapid: " + r.j.score.correct + " / " + r.j.score.total);
+  // Leadership și Relații au câte două voturi; la egalitate câștigă testul care apare primul pe site.
+  ok(r.j.next.id === "leadership" && r.j.choices[0].note, "test recomandat: " + r.j.next.name);
+  r = await call("POST", "/api/quick", { answers: Object.fromEntries(quick.map((q) => [q.id, 3])) }); ok(r.j.score.correct === 0 && r.j.score.title === TESTS.quick.levels.low.title && r.j.next.id === "emotional", "toate greșite → treapta de jos, recomandă " + r.j.next.name);
+
   console.log("profil + test");
   r = await call("POST", "/api/profile", {}); const P = { "X-Profile": r.j.token }; ok(r.j.token.length === 32, "token");
   r = await call("POST", "/api/profile", {}, { Origin: "http://evil.example" }); ok(r.status === 403, "altă origine refuzată");
@@ -55,8 +68,13 @@ async function call(method, url, body, headers = {}) {
   r = await call("PUT", "/api/site", { rev: 1, doc }, A); ok(r.status === 400, "preț negativ: " + (r.j && r.j.error));
   doc.site.settings.products.modul.price = 19.99; doc.tests.modules.iq.questions[0].correct = 9;
   r = await call("PUT", "/api/site", { rev: 1, doc }, A); ok(r.status === 400, "răspuns corect greșit: " + (r.j && r.j.error));
-  doc.tests.modules.iq.questions[0].correct = 2; doc.site.extra = 1;
+  doc.tests.modules.iq.questions[0].correct = 2; doc.tests.quick.questions[1].options[0].right = true;
+  r = await call("PUT", "/api/site", { rev: 1, doc }, A); ok(r.status === 400 && /Test rapid/.test(r.j.error), "două răspunsuri corecte la testul rapid: " + (r.j && r.j.error));
+  doc.tests.quick.questions[1].options[0].right = false; doc.tests.quick.questions[0].options[0].module = "nuexista";
+  r = await call("PUT", "/api/site", { rev: 1, doc }, A); ok(r.status === 400 && /nu există/.test(r.j.error), "test recomandat inexistent: " + (r.j && r.j.error));
+  doc.tests.quick.questions[0].options[0].module = "relations"; doc.site.quick.on = false; doc.site.extra = 1;
   r = await call("PUT", "/api/site", { rev: 1, doc }, A); ok(r.status === 200 && r.j.rev === 2 && !("extra" in r.j.doc.site), "salvare rev 2, câmp necunoscut aruncat");
+  r = await call("GET", "/api/quick"); ok(r.status === 404, "test rapid oprit din panou → 404");
   r = await call("GET", "/api/admin/history", undefined, A); ok(r.j.versions.length === 1, "istoric: " + r.j.versions.length);
   r = await call("POST", "/api/admin/promos", { code: "tot100", type: "percent", percent: 100 }, A); ok(r.j.codes[0].code === "TOT100", "cod 100%");
   r = await call("POST", "/api/admin/promos", { type: "2plus1", max: 1 }, A); const c21 = r.j.codes[0].code; ok(r.j.codes.length === 2, "cod 2+1 generat " + c21);

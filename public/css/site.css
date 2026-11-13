@@ -106,6 +106,8 @@ main { flex: 1; outline: none; }
 .topics .ico { width: 2rem; height: 2rem; color: #E7A8F5; stroke-width: 1.4; }
 .topics a:hover, .topics a:hover .ico { color: #fff; }
 .btn-hero { width: min(100%, 30rem); min-height: 3.75rem; margin-top: 0.75rem; padding: 0.9rem 2rem; font-size: 1.2rem; }
+.hero-alt { padding: 0.35rem 0.5rem; color: var(--muted); font-size: 1rem; text-decoration: underline; text-decoration-color: #E24BD0; text-underline-offset: 5px; }
+.hero-alt:hover { color: #fff; }
 @media (min-width: 52rem) {
   .topics { gap: 1.1rem 0; }
   .topics li { flex: 0 0 7.25rem; max-width: none; }

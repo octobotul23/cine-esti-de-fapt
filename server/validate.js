@@ -143,6 +143,22 @@ function validateDoc(input, defaults) {
     }
   }
 
+  const k = tests.quick;
+  if (!k.questions.length) errs.push("Test rapid: are nevoie de cel puțin o întrebare.");
+  unique(k.questions, "id", "Test rapid → întrebări", errs);
+  k.questions.forEach((q, i) => {
+    const w = "Test rapid → întrebarea " + (i + 1);
+    if (!q.text.trim()) errs.push(w + ": nu are text.");
+    if (q.options.length < 2 || q.options.length > 6) errs.push(w + ": are nevoie de 2 până la 6 variante de răspuns.");
+    if (q.options.some((o) => !o.text.trim())) errs.push(w + ": o variantă de răspuns este goală. Completați-o sau ștergeți-o.");
+    if (q.options.filter((o) => o.right).length > 1) errs.push(w + ": doar o variantă poate fi răspunsul corect. Lăsați bifa la una singură.");
+    q.options.forEach((o) => { if (o.module && !ids.includes(o.module)) errs.push(w + ": testul „" + o.module + "”, ales la varianta „" + o.text + "”, nu există. Alegeți unul din listă."); });
+  });
+  range(k.thresholds.low, 1, 99, "Test rapid → pragul de jos", errs);
+  range(k.thresholds.high, 2, 100, "Test rapid → pragul de sus", errs);
+  if (k.thresholds.low >= k.thresholds.high) errs.push("Test rapid: pragul de jos trebuie să fie sub pragul de sus.");
+  for (const lv of ["low", "mid", "high"]) if (!k.levels[lv].title.trim()) errs.push("Test rapid → textul de la scor: una dintre trepte nu are titlu.");
+
   const c = tests.couple;
   const cats = unique(c.cats, "id", "Test de cuplu → teme", errs);
   unique(c.questions, "id", "Test de cuplu → întrebări", errs);

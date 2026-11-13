@@ -4,6 +4,7 @@
 // Sursa întrebărilor: biblioteca de întrebări a site-ului (docs/biblioteca-intrebari.csv, modulele M1–M6).
 // Sunt întrebări scrise pentru acest site, nu instrumente psihometrice etalonate.
 // La „IQ orientativ”, după cele 30 de întrebări din bibliotecă urmează 30 mai grele, scrise tot pentru acest site.
+// Testul rapid („quick”) folosește cele 10 rânduri FREE din aceeași bibliotecă.
 
 // Rând compact → întrebare cu scală de acord. sign: 1 = acordul crește scorul, -1 = îl scade.
 function likert(prefix, free, rows) {
@@ -426,6 +427,81 @@ const TESTS = {
         { n: 21, name: "Lumea", keys: "împlinire, întreg, drum încheiat", scurt: "Uită-te cât ai mers. Ai voie să te bucuri.", sens: "Lumea închide cercul început de Nebun. Vorbește despre un drum dus la capăt și despre sentimentul că lucrurile sunt la locul lor.", umbra: "Oprirea pe loc, de teamă să nu strici ce ai.", sfat: "Sărbătorește azi un lucru pe care l-ai dus la capăt.", personal: "Duci lucrurile până la capăt. Vezi întregul, nu doar bucățile, și ai darul de a lega oameni și idei." }
       ]
     }
+  },
+
+  // Testul rapid, gratuit: zece întrebări amestecate (rândurile FREE din bibliotecă). Nu se păstrează nimic din el.
+  // O variantă cu right: true e răspunsul corect, iar întrebarea intră la scor. Dacă nicio variantă nu e bifată,
+  // omul vede la final „note” (ce spune alegerea lui), iar „module” e testul spre care trage acel răspuns.
+  quick: {
+    // Textul de sub scor, după procentul de răspunsuri corecte.
+    thresholds: { low: 50, high: 100 },
+    levels: {
+      low: { title: "Azi te-ai grăbit", text: "Întrebările erau scurte, dar fiecare avea o mică capcană. Pe fugă, scapă oricui. La testul de logică ai timp să te așezi." },
+      mid: { title: "Aproape tot", text: "Ai prins cele mai multe capcane. Ce a scăpat vine de obicei din grabă, nu din neștiință." },
+      high: { title: "Nu ți-a scăpat nimic", text: "Ai fost atent la detalii și nu te-ai lăsat păcălit de procente. Testul de logică pornește de aici și urcă mult." }
+    },
+    questions: [
+      { id: "r01", topic: "Viața reală", text: "Un prieten îți promite ceva și nu se ține de cuvânt. Ce faci?", explain: "", options: [
+        { text: "Îi spun ce m-a deranjat", note: "Spui lucrurilor pe nume. Oamenii știu unde se află cu tine, iar supărările nu apucă să se adune.", module: "relations", right: false },
+        { text: "Întreb ce s-a întâmplat", note: "Întâi vrei să înțelegi, abia apoi judeci. Le lași oamenilor loc să se explice.", module: "emotional", right: false },
+        { text: "Mă retrag", note: "Te ferești de discuțiile incomode. Scapi de ceartă pe moment, dar celălalt nu află ce te-a durut.", module: "relations", right: false },
+        { text: "Fac o glumă și trec peste", note: "Destinzi lucrurile cu umor. Merită să te întrebi dacă gluma închide subiectul sau doar îl amână.", module: "emotional", right: false }
+      ] },
+      { id: "r02", topic: "Logică", text: "Un produs de 100 lei se reduce cu 20%, apoi crește cu 20%. Cât costă?", explain: "După reducere costă 80 de lei. 20% din 80 înseamnă 16 lei, deci ajunge la 96, nu înapoi la 100.", options: [
+        { text: "100 lei", note: "", module: "", right: false },
+        { text: "96 lei", note: "", module: "", right: true },
+        { text: "98 lei", note: "", module: "", right: false },
+        { text: "104 lei", note: "", module: "", right: false }
+      ] },
+      { id: "r03", topic: "Atenție", text: "Care șir e diferit?", explain: "Al treilea șir se termină în 3, nu în 8.", options: [
+        { text: "B8B8", note: "", module: "", right: false },
+        { text: "B8B8", note: "", module: "", right: false },
+        { text: "B8B3", note: "", module: "", right: true },
+        { text: "B8B8", note: "", module: "", right: false }
+      ] },
+      { id: "r04", topic: "Relații", text: "Ai o discuție importantă, dar ești obosit. Ce faci?", explain: "", options: [
+        { text: "Discut acum", note: "Nu lași lucrurile să aștepte. E bine, cât timp nu vorbește oboseala în locul tău.", module: "relations", right: false },
+        { text: "Propun o oră potrivită", note: "Știi că o discuție bună are nevoie de un moment bun. Îți cunoști limitele și le spui.", module: "emotional", right: false },
+        { text: "Evit discuția", note: "Când nu mai ai energie, amâni. Pe moment ajută, dar discuția rămâne acolo.", module: "relations", right: false },
+        { text: "Ascult fără să spun nimic", note: "Ești de față, dar îți ții părerea pentru tine. Celălalt poate crede că ești de acord.", module: "relations", right: false }
+      ] },
+      { id: "r05", topic: "Memorie", text: "Ține minte: LUNĂ, CHEIE, PORTOCALĂ. Care este al doilea cuvânt?", explain: "Ordinea era LUNĂ, CHEIE, PORTOCALĂ.", options: [
+        { text: "LUNĂ", note: "", module: "", right: false },
+        { text: "CHEIE", note: "", module: "", right: true },
+        { text: "PORTOCALĂ", note: "", module: "", right: false },
+        { text: "Nu știu", note: "", module: "", right: false }
+      ] },
+      { id: "r06", topic: "Emoții", text: "Când cineva te critică în public, ce faci de obicei?", explain: "", options: [
+        { text: "Cer un exemplu concret", note: "Rămâi cu picioarele pe pământ și cauți ce e de folos în critică. Nu o iei personal din prima.", module: "leadership", right: false },
+        { text: "Mă apăr", note: "Reacționezi repede când te simți atacat. E firesc. Contează ce faci după ce trece primul val.", module: "emotional", right: false },
+        { text: "Tac, dar mă afectează", note: "Duci critica în tine mai mult decât se vede. Ce nu spui pe loc rămâne cu tine mai mult timp.", module: "emotional", right: false },
+        { text: "Schimb subiectul", note: "Ieși repede din situațiile care te pun într-o lumină proastă. Scapi de moment, nu și de întrebare.", module: "dark", right: false }
+      ] },
+      { id: "r07", topic: "Calcul", text: "Trei prieteni împart 150 lei în mod egal. Cât plătește fiecare?", explain: "150 împărțit la 3 face 50.", options: [
+        { text: "30", note: "", module: "", right: false },
+        { text: "40", note: "", module: "", right: false },
+        { text: "50", note: "", module: "", right: true },
+        { text: "60", note: "", module: "", right: false }
+      ] },
+      { id: "r08", topic: "Decizii", text: "Ai două oferte de muncă. Ce contează cel mai mult?", explain: "", options: [
+        { text: "Banii", note: "Vrei ca munca ta să se vadă în ceva concret. Știi cât valorezi și nu te sfiești să ceri.", module: "leadership", right: false },
+        { text: "Timpul liber", note: "Munca e o parte din viața ta, nu toată. Îți aperi timpul pentru oameni și pentru tine.", module: "bigfive", right: false },
+        { text: "Dezvoltarea", note: "Te atrage ce poți învăța, nu doar ce primești. Te plictisești repede acolo unde nu mai crești.", module: "bigfive", right: false },
+        { text: "Stabilitatea", note: "Îți place să știi pe ce te bazezi. Construiești încet și sigur.", module: "bigfive", right: false }
+      ] },
+      { id: "r09", topic: "Atenție", text: "Care simbol apare o singură dată?", explain: "Triunghiul apare o dată, cercul de trei ori.", options: [
+        { text: "●", note: "", module: "", right: false },
+        { text: "▲", note: "", module: "", right: true },
+        { text: "●", note: "", module: "", right: false },
+        { text: "●", note: "", module: "", right: false }
+      ] },
+      { id: "r10", topic: "Dezvoltare", text: "Ce ai vrea să îmbunătățești în următoarea lună?", explain: "", options: [
+        { text: "Concentrarea", note: "Simți că atenția ți se împarte în prea multe locuri. E primul lucru de antrenat și cel mai ușor de măsurat.", module: "iq", right: false },
+        { text: "Comunicarea", note: "Vrei să te faci mai bine înțeles și să îi înțelegi mai bine pe ceilalți.", module: "relations", right: false },
+        { text: "Încrederea", note: "Știi că poți mai mult decât arăți. Încrederea crește din lucruri mici, duse la capăt.", module: "leadership", right: false },
+        { text: "Gestionarea stresului", note: "Duci mult și se simte. Să știi ce te încarcă e jumătate din drum.", module: "emotional", right: false }
+      ] }
+    ]
   },
 
   // Testul de cuplu „Cât ne cunoaștem?”.

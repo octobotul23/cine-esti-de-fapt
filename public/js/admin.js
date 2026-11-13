@@ -6,7 +6,7 @@
   const $ = (sel, root) => (root || document).querySelector(sel);
   const main = $("#adm"), nav = $("#nav"), bar = $("#savebar"), barMsg = $("#save-msg"), saveBtn = $("#save");
   const BAR_TEXT = barMsg.textContent;
-  const SECTIONS = [["texte", "Texte"], ["preturi", "Prețuri"], ["teste", "Teste"], ["cuplu", "Test de cuplu"], ["tarot", "Tarot"], ["raport", "Raport"], ["coduri", "Coduri promo"], ["setari", "Setări"]];
+  const SECTIONS = [["texte", "Texte"], ["preturi", "Prețuri"], ["teste", "Teste"], ["rapid", "Test rapid"], ["cuplu", "Test de cuplu"], ["tarot", "Tarot"], ["raport", "Raport"], ["coduri", "Coduri promo"], ["setari", "Setări"]];
 
   let csrf = "", rev = 0, doc = null, origJson = "", section = "texte", curMod = "", query = "", pageMap = null, uid = 0, version = null;
   const open = new Set(["g:Prima pagină"]);   // ce grupuri și rânduri sunt deschise
@@ -474,6 +474,41 @@
       mod.type === "likert" ? likertEditor(curMod, mod) : quizEditor(curMod, mod)];
   }
 
+  // ---- Test rapid
+  function viewRapid() {
+    const Q = doc.tests.quick;
+    const mods = [["", "Niciun test anume"]].concat(doc.site.modules.filter((m) => doc.tests.modules[m.id]).map((m) => [m.id, m.name || m.id]));
+    const scored = (q) => q.options.some((o) => o.right);
+    const newOption = () => ({ text: "", note: "", module: "", right: false });
+    const level = (k, title) => h("section", { class: "stack" }, h("span", { class: "label" }, title), text(Q.levels[k], "title", "Titlul afișat sub scor"), text(Q.levels[k], "text", "Textul de sub titlu", { long: true }));
+    return [h("h1", null, "Test rapid"), h("p", { class: "lead" }, "Testul scurt și gratuit: întrebările lui, ce vede omul la final și spre ce test îl trimite. Numele testului și celelalte texte ale paginii se schimbă din „Texte”, la grupa „Testul rapid”."),
+      h("section", { class: "box" }, toggle(doc.site.quick, "on", "Se vede pe site", "Când e oprit, dispar linkul de sub butonul mare din prima pagină și rândul lui din listele de teste.")),
+      group("rq:q", "Întrebări", many(Q.questions.length, "întrebare", "întrebări") + ", din care " + Q.questions.filter(scored).length + " cu răspuns corect.", () => list({
+        id: "rq", items: Q.questions, min: 1, addLabel: "Adăugați o întrebare",
+        make: (b) => Object.assign(b, { id: newId("r"), options: [newOption(), newOption()] }),
+        title: (q, i) => (i + 1) + ". " + (short(q.text, 80) || "Întrebare nouă") + (scored(q) ? " (cu răspuns corect)" : ""),
+        body: (q) => [
+          text(q, "text", "Întrebarea", { long: true }),
+          text(q, "topic", "Tema, într-un cuvânt sau două", { max: 40, hint: "De exemplu: Logică, Relații." }),
+          labeled("Variantele de răspuns", list({
+            id: "rqo:" + q.id, items: q.options, min: 2, max: 6, addLabel: "Adăugați o variantă", make: newOption,
+            title: (o, i) => (i + 1) + ". " + (short(o.text, 60) || "Variantă nouă") + (o.right ? " (corect)" : ""),
+            body: (o) => [
+              text(o, "text", "Varianta de răspuns"),
+              toggle(o, "right", "Acesta este răspunsul corect", "Bifați la cel mult o variantă. Întrebarea intră atunci la scor."),
+              text(o, "note", "Ce spune această alegere despre om", { long: true, hint: "Apare la final, la „Ce spun alegerile tale”, doar la întrebările fără răspuns corect." }),
+              pick(o, "module", "Testul spre care trage acest răspuns", mods, "La final este recomandat testul ales de cele mai multe răspunsuri. Contează doar la întrebările fără răspuns corect.")
+            ]
+          }), "Între 2 și 6 variante. Dacă nicio variantă nu e bifată drept corectă, omul vede la final ce spune alegerea lui."),
+          text(q, "explain", "Explicația răspunsului corect", { long: true, hint: "Apare la final, la „Răspunsurile corecte”. Lăsați gol la întrebările fără răspuns corect." })
+        ]
+      })),
+      group("rq:levels", "Textul de la scor", "Titlul și textul de sub „câte a nimerit”, pe trei trepte.", () => [
+        h("div", { class: "cols" }, num(Q.thresholds, "low", "Treapta de jos: sub acest procent de răspunsuri corecte", { int: true, min: 1, max: 99 }), num(Q.thresholds, "high", "Treapta de sus: de la acest procent", { int: true, min: 2, max: 100, hint: "La 100, treapta de sus apare doar când toate răspunsurile sunt corecte." })),
+        level("low", "Treapta de jos"), level("mid", "Treapta de mijloc"), level("high", "Treapta de sus")
+      ])];
+  }
+
   // ---- Test de cuplu
   function viewCuplu() {
     const C = doc.tests.couple;
@@ -680,7 +715,7 @@
       version && version.number ? h("p", { class: "adm-version" }, "v" + version.number + (version.date ? " · urcată pe " + day(version.date) : "")) : null];
   }
 
-  const VIEWS = { texte: viewTexte, preturi: viewPreturi, teste: viewTeste, cuplu: viewCuplu, tarot: viewTarot, raport: viewRaport, coduri: viewCoduri, setari: viewSetari };
+  const VIEWS = { texte: viewTexte, preturi: viewPreturi, teste: viewTeste, rapid: viewRapid, cuplu: viewCuplu, tarot: viewTarot, raport: viewRaport, coduri: viewCoduri, setari: viewSetari };
 
   // ---- Pornire
   (async function start() {

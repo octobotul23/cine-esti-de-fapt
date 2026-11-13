@@ -138,6 +138,38 @@ function buildReport(tests, siteModules, answersByModule) {
   return out;
 }
 
+// ---- Testul rapid. Nu se păstrează nimic: rezultatul se calculează din răspunsurile trimise.
+function quickComplete(qs, answers) {
+  return qs.every((q) => isInt(answers[q.id], 0, q.options.length - 1));
+}
+// modules: testele care se văd pe site, în ordinea lor. Testul recomandat e cel spre care trag cele mai multe
+// răspunsuri; la egalitate câștigă cel care apare primul pe site.
+function quickResult(quick, answers, modules) {
+  const choices = [], review = [], votes = {};
+  let correct = 0;
+  for (const q of quick.questions) {
+    const v = answers[q.id];
+    const right = q.options.findIndex((o) => o.right);
+    if (right >= 0) {
+      if (v === right) correct += 1;
+      review.push({ topic: q.topic, text: q.text, options: q.options.map((o) => o.text), yours: v, right, explain: q.explain });
+    } else {
+      const o = q.options[v];
+      choices.push({ topic: q.topic, text: q.text, answer: o.text, note: o.note });
+      if (o.module) votes[o.module] = (votes[o.module] || 0) + 1;
+    }
+  }
+  let next = null;
+  for (const m of modules) if (!next || (votes[m.id] || 0) > (votes[next.id] || 0)) next = m;
+  let score = null;
+  if (review.length) {
+    const pct = (correct / review.length) * 100;
+    const level = quick.levels[pct < quick.thresholds.low ? "low" : pct >= quick.thresholds.high ? "high" : "mid"];
+    score = { correct, total: review.length, title: level.title, text: level.text };
+  }
+  return { total: quick.questions.length, score, choices, review, next: next ? { id: next.id, name: next.name, tagline: next.tagline } : null };
+}
+
 // ---- Tarot
 function cardOfDay(cards, profileHash, day) {
   const h = crypto.createHash("sha256").update(profileHash + "|" + day).digest();
@@ -205,6 +237,6 @@ function pairReport(couple, qs, a, b) {
 }
 
 module.exports = {
-  isInt, validAnswer, inScope, countAnswered, moduleStatus, moduleResult, buildReport,
+  isInt, validAnswer, inScope, countAnswered, moduleStatus, moduleResult, buildReport, quickComplete, quickResult,
   cardOfDay, personalNumber, drawSpread, publicCard, pairAnswerOk, pairCount, pairSame, pairReport
 };

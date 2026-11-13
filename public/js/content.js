@@ -108,6 +108,7 @@
       faqTitle: "Întrebări dese",
       faq: [
         { q: "Chiar e gratis la început?", a: "Da. Varianta scurtă a fiecărui test și rezultatul ei parțial sunt gratuite. Prețul raportului complet îl vezi înainte să începi." },
+        { q: "Ce este testul rapid?", a: "Zece întrebări amestecate, de vreo două minute, complet gratuite. La final vezi câte ai nimerit, ce spun alegerile tale și cu ce test merită să continui. Răspunsurile de la testul rapid nu se păstrează." },
         { q: "Trebuie să îmi fac cont?", a: "Nu. Primești un link privat cu care te întorci oricând la rezultatele tale. Nu îți cerem nume sau parolă." },
         { q: "Cât durează?", a: "Varianta scurtă a unui test durează două-trei minute. Cea completă, între cinci și zece minute, iar la IQ orientativ în jur de douăzeci. Poți face testele pe rând, în zile diferite." },
         { q: "Cum merge testul de cuplu?", a: "Tu răspunzi primul, apoi îi trimiți partenerului un link pe WhatsApp. El răspunde separat, de pe telefonul lui. Rezultatul apare doar după ce ați răspuns amândoi." },
@@ -119,6 +120,23 @@
       ],
       notaTitle: "Ce nu este acest site",
       nota: "Testele sunt un instrument de autocunoaștere. Nu pun diagnostice și nu înlocuiesc discuția cu un psiholog. Cifra de la IQ orientativ este o estimare, nu un IQ măsurat clinic. Tarotul este un joc de reflecție, nu o prezicere."
+    },
+
+    // Testul rapid: gratuit, fără link privat. Întrebările lui stau în server/tests.js („quick”) și se schimbă
+    // din panou → Test rapid. „on” îl arată sau îl ascunde pe site.
+    quick: {
+      on: true,
+      name: "Testul rapid",
+      tagline: "Zece întrebări amestecate, două minute. Gratuit, cu rezultat pe loc.",
+      heroLink: "Ai doar două minute? Fă testul rapid",
+      resultLead: "Un instantaneu, nu un verdict. Testele complete merg mult mai în adânc.",
+      scoreLabel: "Logică, atenție și memorie",
+      choicesTitle: "Ce spun alegerile tale",
+      reviewTitle: "Răspunsurile corecte",
+      nextTitle: "De aici merită să continui",
+      nextLead: "După alegerile tale, acesta e testul care ți se potrivește cel mai bine acum.",
+      allTests: "Vezi toate testele",
+      again: "Fă testul rapid din nou"
     },
 
     eu: {

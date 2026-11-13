@@ -112,7 +112,7 @@
     window.scrollTo(0, 0);
   }
   const routes = [
-    [/^\/eu$/, viewEu], [/^\/test\/([\w-]+)$/, viewTest], [/^\/rezultat\/([\w-]+)$/, viewResult], [/^\/tarot$/, viewTarot], [/^\/raport$/, viewReport],
+    [/^\/eu$/, viewEu], [/^\/rapid$/, viewQuick], [/^\/rapid\/rezultat$/, viewQuickResult], [/^\/test\/([\w-]+)$/, viewTest], [/^\/rezultat\/([\w-]+)$/, viewResult], [/^\/tarot$/, viewTarot], [/^\/raport$/, viewReport],
     [/^\/noi$/, viewNoi], [/^\/noi\/([\w-]{16})$/, viewCouple], [/^\/noi\/([\w-]{16})\/test$/, viewCoupleTest], [/^\/invitatie\/([\w-]{16})$/, viewInvite],
     [/^\/plata\/gata\/([\w-]{16})$/, viewPaid], [/^\/plata(?:\/(modul|pachet|cuplu)(?:\/([\w-]+))?)?$/, viewPay], [/^\/profil$/, viewProfile], [/^\/p\/([\w-]{32})$/, adoptToken],
     [/^\/confidentialitate$/, () => viewLegal("privacy")], [/^\/termeni$/, () => viewLegal("terms")]
@@ -120,7 +120,7 @@
   // Arată în meniul de sus pe ce pagină ești.
   function markNav(path) {
     const where = path === "/" || path === "/preturi" || path === "/tarot" ? path
-      : /^\/(eu|test|rezultat|raport)\b/.test(path) ? "/eu" : /^\/(noi|invitatie)\b/.test(path) ? "/noi" : "";
+      : /^\/(eu|rapid|test|rezultat|raport)\b/.test(path) ? "/eu" : /^\/(noi|invitatie)\b/.test(path) ? "/noi" : "";
     for (const a of document.querySelectorAll(".nav a")) {
       if (a.getAttribute("href") === "#" + where) a.setAttribute("aria-current", "page"); else a.removeAttribute("aria-current");
     }
@@ -165,12 +165,17 @@
     if (!m) return "";
     return fmt(m.type === "tarot" ? S.ui.cards : S.ui.questions, { n: m.type === "tarot" ? m.cards : m.total });
   };
+  // Rândul testului rapid, pus înaintea celorlalte teste. Lipsește când testul e oprit din panou.
+  const quickRow = (meta) => (S.quick.on ? h("li", null, h("a", { class: "row", href: "#/rapid" },
+    h("span", { class: "row-name" }, S.quick.name), h("span", { class: "row-sub" }, S.quick.tagline), h("span", { class: "row-meta" }, meta))) : null);
+  const quickCount = () => (META && META.quick ? fmt(S.ui.questions, { n: META.quick.total }) : "");
   function renderHome() {
     fillTexts();
     const mods = S.modules.filter((m) => m.on);
     const hasTarot = mods.some((m) => m.id === "tarot");
     $("#nav-tarot").hidden = !hasTarot;
     $("#way-tarot").hidden = !hasTarot;
+    $("#hero-rapid").hidden = !S.quick.on;
     // Rândul de iconițe: câte una pentru fiecare test pornit, plus testul de cuplu.
     $("#home-topics").replaceChildren(
       ...mods.map((m) => h("li", null, h("a", { href: m.id === "tarot" ? "#/tarot" : "#/test/" + m.id }, icon(m.id), h("span", null, m.name)))),
@@ -188,12 +193,12 @@
     }
     $(".plan-intro").textContent = fmt(S.home.pachetIntro, { n: mods.length });
     $("#home-steps").replaceChildren(...S.home.pasi.map((p) => h("li", null, h("h3", null, p.title), h("p", null, p.body))));
-    $("#home-modules").replaceChildren(...mods.map((m) => {
+    $("#home-modules").replaceChildren(...[quickRow([quickCount(), h("br"), S.ui.free])].concat(mods.map((m) => {
       const meta = META && META.modules[m.id];
       return h("li", null, h("a", { class: "row", href: m.id === "tarot" ? "#/tarot" : "#/test/" + m.id },
         h("span", { class: "row-name" }, m.name), h("span", { class: "row-sub" }, m.tagline),
         h("span", { class: "row-meta" }, counts(m.id), meta && meta.free ? h("br") : null, meta && meta.free ? fmt(S.ui.freeQuestions, { n: meta.free }) : null)));
-    }));
+    })).filter(Boolean));
     $("#home-faq").replaceChildren(...S.home.faq.map((f) => h("details", null, h("summary", null, f.q), h("p", null, f.a))));
     $("#year").textContent = new Date().getFullYear();
     const mail = $("#foot-mail");
@@ -220,7 +225,8 @@
     const pack = product("pachet");
     const reportBox = h("div", { class: "box box-accent" }, h("h2", null, S.eu.raportTitle), h("p", { class: "muted" }, S.eu.raportLead),
       h("div", { class: "actions" }, me.hasReport ? btn(S.eu.raportCta, "/raport") : pack.on ? priceBtn(S.eu.pachetCta, pack.price, "/plata/pachet") : null));
-    return page("eu", head(S.settings.siteName, S.eu.lead, "/"), online ? null : h("p", { class: "err" }, S.ui.noServer), h("ul", { class: "rows" }, rows), reportBox);
+    const quick = quickRow([h("span", { class: "tag" }, S.ui.free), h("br"), S.ui.startFree]);
+    return page("eu", head(S.settings.siteName, S.eu.lead, "/"), online ? null : h("p", { class: "err" }, S.ui.noServer), h("ul", { class: "rows" }, quick, rows), reportBox);
   }
 
   // ---- Un test: câte o întrebare pe ecran, cu salvare după fiecare răspuns
@@ -283,6 +289,56 @@
       done: () => go("/rezultat/" + id)
     });
     return { world: "eu", node };
+  }
+
+  // ---- Testul rapid: gratuit, fără link privat. Răspunsurile stau doar în acest browser, până se închide fila.
+  const QUICK_KEY = "cq_rapid";
+  let quickMem = null;
+  function quickLoad() {
+    if (quickMem) return quickMem;
+    let v = null;
+    try { v = JSON.parse(sessionStorage.getItem(QUICK_KEY) || "{}"); } catch (e) { /* fără stocare sau conținut stricat */ }
+    quickMem = v && typeof v === "object" && !Array.isArray(v) ? v : {};
+    return quickMem;
+  }
+  function quickKeep(answers) {
+    quickMem = answers;
+    try { if (answers) sessionStorage.setItem(QUICK_KEY, JSON.stringify(answers)); else sessionStorage.removeItem(QUICK_KEY); } catch (e) { /* fără stocare: rămân în memorie */ }
+  }
+  async function viewQuick() {
+    if (!online) throw new Error(S.ui.noServer);
+    const t = await api("GET", "quick");
+    const saved = quickLoad(), answers = {};
+    for (const q of t.questions) if (Number.isInteger(saved[q.id]) && saved[q.id] >= 0 && saved[q.id] < q.options.length) answers[q.id] = saved[q.id];
+    if (t.questions.every((q) => answers[q.id] !== undefined)) { go("/rapid/rezultat"); return null; }
+    const node = runner({
+      title: S.quick.name, questions: t.questions, answers, exit: "/eu",
+      steps: (q) => [{ prompt: S.test.quizPrompt, options: q.options, base: 0 }],
+      save: async () => quickKeep(answers),
+      done: () => go("/rapid/rezultat")
+    });
+    return { world: "eu", node };
+  }
+  async function viewQuickResult() {
+    if (!online) throw new Error(S.ui.noServer);
+    let r;
+    try { r = await api("POST", "quick", { answers: quickLoad() }); }
+    catch (e) { if (e.status === 400) { go("/rapid"); return null; } throw e; }
+    const kids = [head(S.quick.name, S.quick.resultLead, "/eu")];
+    if (r.score) kids.push(h("section", { class: "box center" }, h("p", { class: "label" }, S.quick.scoreLabel), h("p", { class: "big" }, r.score.correct + " / " + r.score.total),
+      h("h2", null, r.score.title), h("p", { class: "muted" }, r.score.text)));
+    if (r.choices.length) kids.push(h("section", { class: "box" }, h("h2", null, S.quick.choicesTitle), h("ul", { class: "list" }, r.choices.map((c) =>
+      h("li", null, h("span", { class: "muted small" }, c.text), h("b", null, c.answer), c.note ? h("span", null, c.note) : null)))));
+    if (r.next) kids.push(h("section", { class: "box box-accent" }, h("h2", null, S.quick.nextTitle), h("p", { class: "muted" }, S.quick.nextLead),
+      h("div", null, h("p", { class: "row-name" }, r.next.name), h("p", { class: "muted" }, r.next.tagline)),
+      h("div", { class: "actions" }, btn(S.ui.startFree, r.next.id === "tarot" ? "/tarot" : "/test/" + r.next.id), btn(S.quick.allTests, "/eu", "btn-line"))));
+    if (r.review.length) kids.push(h("details", { class: "box" }, h("summary", { class: "label" }, S.quick.reviewTitle), h("ol", { class: "review" }, r.review.map((q) => {
+      const good = q.yours === q.right;
+      return h("li", null, h("b", null, q.text), h("span", { class: good ? "good" : "bad" }, S.rezultat.reviewYours + ": " + q.options[q.yours]),
+        good ? null : h("span", { class: "good" }, S.rezultat.reviewRight + ": " + q.options[q.right]), q.explain ? h("span", { class: "muted" }, q.explain) : null);
+    }))));
+    kids.push(h("div", { class: "actions" }, h("button", { class: "link", type: "button", onclick: () => { quickKeep(null); go("/rapid"); } }, S.quick.again)));
+    return page("eu", kids);
   }
 
   // ---- Rezultatul unui test

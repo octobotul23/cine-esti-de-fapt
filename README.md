@@ -53,14 +53,15 @@ Codurile promo fac excepție: ele se salvează pe loc.
 
 | Secțiune | Ce schimbă pe site |
 | --- | --- |
-| **Texte** | Toate textele din pagini, pe grupe: prima pagină, pagina cu testele, textele din timpul unui test, rezultatul, tarotul, raportul, testul de cuplu, plata, „Linkul meu”, meniul și subsolul, butoanele și mesajele scurte, confidențialitatea și termenii. La „Prima pagină” sunt și rândul de sub titlul mare, butonul mare, cele trei carduri (tu, voi doi, tarot) și, pentru fiecare card de preț, rândurile cu bifă, butonul și eticheta din colț. La „Meniu și subsol” sunt numele din meniul de sus și cele două butoane din colț. Are căutare. |
+| **Texte** | Toate textele din pagini, pe grupe: prima pagină, pagina cu testele, textele din timpul unui test, rezultatul, tarotul, raportul, testul de cuplu, testul rapid, plata, „Linkul meu”, meniul și subsolul, butoanele și mesajele scurte, confidențialitatea și termenii. La „Prima pagină” sunt și rândul de sub titlul mare, butonul mare, cele trei carduri (tu, voi doi, tarot) și, pentru fiecare card de preț, rândurile cu bifă, butonul și eticheta din colț. La „Meniu și subsol” sunt numele din meniul de sus și cele două butoane din colț. Are căutare. |
 | **Prețuri** | Numele, descrierea și prețul de pe cardurile de preț din prima pagină: pentru un test, pentru tot pachetul și pentru testul de cuplu; ce se poate cumpăra și ce nu; moneda. Unealta „Recalculați prețurile” mărește sau scade toate sumele cu un procent și le poate rotunji la ,99. |
 | **Teste** | Lista de teste (nume, descriere, ordine, vizibile sau ascunse), întrebările fiecărui test și care dintre ele sunt gratuite, trăsăturile măsurate și textele lor (scor mic, mediu, mare, sfat), la IQ variantele de răspuns, răspunsul corect și intervalele afișate, scala de răspuns și pragurile de scor mic/mare. |
+| **Test rapid** | Testul scurt și gratuit de la `#/rapid`: dacă se vede pe site, întrebările lui și variantele de răspuns. La fiecare variantă: dacă e răspunsul corect, ce spune alegerea despre om și spre ce test trage. Întrebările fără răspuns corect sunt întrebări de alegere. Tot aici: explicația răspunsului corect și textul de sub scor, pe trei trepte, cu pragurile lor. Numele testului și celelalte texte ale paginii sunt la „Texte”, grupa „Testul rapid”. |
 | **Test de cuplu** | Întrebările și variantele lor, câte sunt gratuite, temele raportului și concluzia pe trei trepte. |
 | **Tarot** | Textele celor 22 de cărți și pozițiile etalării (între 1 și 5 cărți). |
 | **Raport** | Titlurile de profil, introducerile capitolelor, rândul despre IQ și provocarea de 7 zile. |
 | **Coduri promo** | Creați coduri de reducere: procent (0–100%) sau „2 + 1 gratis”. Puteți scrie codul sau îl lăsați generat. Opțional: număr maxim de folosiri, dată de expirare, notă. Un cod poate fi oprit, repornit sau șters. |
-| **Setări** | Numele site-ului și al testului de cuplu, adresa de contact, titlul și descrierea din Google, dacă oamenii își pot lăsa e-mailul; plățile (starea lor, metodele și ordinea lor, moneda, cursul euro, tarifele de SMS; vedeți „Plăți” mai jos); versiunile salvate (ultimele 30, oricare se poate readuce) și revenirea la valorile implicite; cifre, comenzi și lista de adrese de e-mail (CSV); schimbarea parolei; jurnalul. Jos, în colț, scrie mic versiunea care rulează (de ex. „v0.3.0 · urcată pe 13.11.2026”); numărul vine din `package.json` și se vede doar în panou. |
+| **Setări** | Numele site-ului și al testului de cuplu, adresa de contact, titlul și descrierea din Google, dacă oamenii își pot lăsa e-mailul; plățile (starea lor, metodele și ordinea lor, moneda, cursul euro, tarifele de SMS; vedeți „Plăți” mai jos); versiunile salvate (ultimele 30, oricare se poate readuce) și revenirea la valorile implicite; cifre, comenzi și lista de adrese de e-mail (CSV); schimbarea parolei; jurnalul. Jos, în colț, scrie mic versiunea care rulează (de ex. „v0.4.0 · urcată pe 13.11.2026”); numărul vine din `package.json` și se vede doar în panou. |
 
 ### Două reguli pentru texte
 
@@ -269,7 +270,7 @@ Ca să îl vedeți pe calculator înainte de încărcare: `node tools/build-demo
 ## De știut înainte de lansare
 
 - Textele din „Confidențialitate” și „Termeni” sunt ciorne. Trebuie citite de cineva care se pricepe.
-- Întrebările vin din biblioteca de întrebări a site-ului (`docs/biblioteca-intrebari.csv`, modulele M1–M6). Sunt scrise pentru acest site și nu sunt validate ca instrument psihologic. Rândurile FREE, COUPLE și FRIEND din bibliotecă nu sunt încă folosite pe site.
+- Întrebările vin din biblioteca de întrebări a site-ului (`docs/biblioteca-intrebari.csv`, modulele M1–M6). Sunt scrise pentru acest site și nu sunt validate ca instrument psihologic. Rândurile FREE sunt testul rapid gratuit (`#/rapid`): zece întrebări, rezultat pe loc, iar răspunsurile nu se păstrează pe server. Rândurile COUPLE și FRIEND din bibliotecă nu sunt încă folosite pe site.
 - La „IQ orientativ”, după cele 30 de întrebări ușoare din bibliotecă urmează 30 mai grele. Fără ele, aproape oricine ar primi intervalul cel mai mare. Se pot scoate din panou, la Teste.
 - La „Latura ta ascunsă”, un scor mare înseamnă „mai mult din trăsătură”. Bifa „Afirmație inversă” de la fiecare întrebare (panou, Teste) spune în ce direcție trage întrebarea.
 - „IQ orientativ” dă un interval estimativ, nu un IQ măsurat clinic.
